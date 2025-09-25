@@ -6,15 +6,28 @@ import { useApp } from "@/components/app-provider";
 import type { Invoice, InvoiceStatus, Service, ExpenseType } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Undo2, CheckCheck, Search } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const statusColors: { [key in InvoiceStatus]: string } = {
     'À traiter': 'bg-blue-500 hover:bg-blue-500/80',
@@ -29,6 +42,7 @@ const statusColors: { [key in InvoiceStatus]: string } = {
 
 export default function HistoryPage() {
     const { currentUser, invoices, services, revertInvoiceToMandater, markInvoiceAsTraite } = useApp();
+    const { toast } = useToast();
 
     const [fileNameFilter, setFileNameFilter] = React.useState("");
     const [serviceFilter, setServiceFilter] = React.useState("all");
@@ -36,6 +50,10 @@ export default function HistoryPage() {
     const [amountFilter, setAmountFilter] = React.useState("");
     const [statusFilter, setStatusFilter] = React.useState("all");
     const [today, setToday] = React.useState(new Date());
+
+    const [isRevertDialogOpen, setIsRevertDialogOpen] = React.useState(false);
+    const [selectedInvoiceForRevert, setSelectedInvoiceForRevert] = React.useState<Invoice | null>(null);
+    const [revertPassword, setRevertPassword] = React.useState("");
 
     React.useEffect(() => {
         const timer = setInterval(() => {
@@ -62,6 +80,28 @@ export default function HistoryPage() {
             return fileNameMatch && serviceMatch && expenseTypeMatch && amountMatch && statusMatch;
         });
     }, [invoices, fileNameFilter, serviceFilter, expenseTypeFilter, amountFilter, statusFilter, currentUser]);
+
+    const handleRevertClick = (invoice: Invoice) => {
+        setSelectedInvoiceForRevert(invoice);
+        setIsRevertDialogOpen(true);
+        setRevertPassword("");
+    };
+
+    const handleRevertConfirm = () => {
+        if (revertPassword === "Daf59") {
+            if (selectedInvoiceForRevert) {
+                revertInvoiceToMandater(selectedInvoiceForRevert.id);
+            }
+            setIsRevertDialogOpen(false);
+            setSelectedInvoiceForRevert(null);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Erreur",
+                description: "Mot de passe incorrect.",
+            });
+        }
+    };
 
     if (!currentUser || !['FINANCES', 'COMMANDE PUBLIQUE'].includes(currentUser.role)) {
         return (
@@ -176,7 +216,7 @@ export default function HistoryPage() {
                                                             { (invoice.status === 'Mandatée' || invoice.status === 'Traité') && (
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <Button variant="ghost" size="icon" onClick={() => revertInvoiceToMandater(invoice.id)}>
+                                                                        <Button variant="ghost" size="icon" onClick={() => handleRevertClick(invoice)}>
                                                                             <Undo2 className="h-4 w-4" />
                                                                         </Button>
                                                                     </TooltipTrigger>
@@ -215,6 +255,31 @@ export default function HistoryPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            <AlertDialog open={isRevertDialogOpen} onOpenChange={setIsRevertDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer l'action</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Pour remettre la facture "{selectedInvoiceForRevert?.fileName}" au statut "À mandater", veuillez saisir le mot de passe de confirmation.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Mot de passe</Label>
+                        <Input
+                            id="password"
+                            type="password"
+                            value={revertPassword}
+                            onChange={(e) => setRevertPassword(e.target.value)}
+                            placeholder="•••••"
+                        />
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setSelectedInvoiceForRevert(null)}>Annuler</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleRevertConfirm}>Confirmer</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </TooltipProvider>
     );
 }
