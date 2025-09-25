@@ -1,9 +1,9 @@
+
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useApp } from "./app-provider";
 import { FullScreenToggle } from "./full-screen-toggle";
-import { UserNav } from "./user-nav";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
@@ -35,7 +35,6 @@ export default function AppHeader() {
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>
-        <UserNav />
       </div>
     </header>
   );

@@ -21,6 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 
 const statusConfig: { [key in InvoiceStatus]: { icon: React.ElementType, color: string, label: string } } = {
@@ -165,7 +165,9 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
         <AlertDialog>
             <Tooltip>
                 <TooltipTrigger asChild>
-                     <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
+                     <AlertDialogTrigger asChild>
+                        <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
+                    </AlertDialogTrigger>
                 </TooltipTrigger>
                 <TooltipContent><p>Rejeter</p></TooltipContent>
             </Tooltip>
