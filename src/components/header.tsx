@@ -6,7 +6,7 @@ import { useApp } from "./app-provider";
 import { FullScreenToggle } from "./full-screen-toggle";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider } from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 export default function AppHeader() {
   const { currentUser, logout } = useApp();
