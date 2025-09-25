@@ -183,7 +183,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 if (invoice.status === 'À traiter') {
                     return (
                         <>
-                            <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')} disabled={!invoice.cpRef}>
+                            <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')}>
                                 <Check className="h-4 w-4" />
                             </Button>
                             {renderRejectDialog('Rejeté CP')}
@@ -315,11 +315,10 @@ export default function DashboardPage() {
     const stats = React.useMemo(() => {
         if (!currentUser) return {};
         
-        const allInvoicesForRole = currentUser.role === 'COMMANDE PUBLIQUE' ? invoices : invoicesForUser;
-
+        const specialServices = ['CCAS', 'SAAD', 'DRE'];
+        
         switch (currentUser.role) {
             case 'COMMANDE PUBLIQUE':
-                const specialServices = ['CCAS', 'SAAD', 'DRE'];
                 const cpInvoices = invoices.filter(inv => !specialServices.includes(inv.service));
                 return {
                     'À Traiter': cpInvoices.filter(i => i.status === 'À traiter').length,
@@ -337,13 +336,14 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             default: // SERVICE role
+                 const serviceInvoices = invoices.filter(inv => inv.service === currentUser.id);
                 return {
-                    'Total Factures': invoicesForUser.length,
-                    'À traiter': invoicesForUser.filter(inv => ['À traiter', 'Validé CP'].includes(inv.status)).length,
-                    'Rejetées': invoicesForUser.filter(inv => inv.status.startsWith('Rejeté')).length,
+                    'Total Factures': serviceInvoices.length,
+                    'À traiter': serviceInvoices.filter(inv => ['À traiter', 'Validé CP'].includes(inv.status)).length,
+                    'Rejetées': serviceInvoices.filter(inv => inv.status.startsWith('Rejeté')).length,
                 };
         }
-    }, [invoicesForUser, currentUser, invoices]);
+    }, [currentUser, invoices]);
     
     const statIcons: {[key: string]: React.ElementType} = {
         'À Traiter': Hourglass,
@@ -466,3 +466,5 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
+
+    
