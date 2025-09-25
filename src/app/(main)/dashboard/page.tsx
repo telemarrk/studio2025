@@ -398,15 +398,13 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'SERVICE':
-                 const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
-                 const serviceInvoices = invoices.filter(inv => managedServices.includes(inv.service) && inv.status !== 'Rejeté Service');
                 return {
-                    'Total Factures': serviceInvoices.length,
+                    'Total Factures': invoicesForUser.length,
                 };
             default: 
                 return {};
         }
-    }, [currentUser, invoices, serviceManagementMap]);
+    }, [currentUser, invoices, invoicesForUser]);
     
     const statIcons: {[key: string]: React.ElementType} = {
         'À Traiter': Hourglass,
@@ -548,3 +546,4 @@ export default function DashboardPage() {
     
 
     
+
