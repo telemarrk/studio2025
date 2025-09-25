@@ -26,15 +26,17 @@ const ServiceForm = ({ service, onSave, onCancel }: { service?: Service | null, 
         }
     };
 
+    const isSpecialRole = service && ['FINANCES', 'COMMANDE PUBLIQUE'].includes(service.id);
+
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
                 <Label htmlFor="name">Nom du service</Label>
-                <Input id="name" value={name} onChange={e => setName(e.target.value)} required />
+                <Input id="name" value={name} onChange={e => setName(e.target.value)} required disabled={isSpecialRole} />
             </div>
             <div>
                 <Label htmlFor="designation">Désignation</Label>
-                <Input id="designation" value={designation} onChange={e => setDesignation(e.target.value)} required />
+                <Input id="designation" value={designation} onChange={e => setDesignation(e.target.value)} required disabled={isSpecialRole} />
             </div>
              <div>
                 <Label htmlFor="password">Mot de passe</Label>
@@ -74,6 +76,11 @@ export default function ServicesPage() {
         setSelectedService(null);
     }
 
+    const servicesToDisplay = React.useMemo(() => {
+        const excludedIds = ['SGFINANCES', 'SGCOMPUB'];
+        return services.filter(service => !excludedIds.includes(service.id));
+    }, [services]);
+
     return (
         <div className="space-y-6">
             <Card>
@@ -108,13 +115,13 @@ export default function ServicesPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {services.map((service) => (
+                                {servicesToDisplay.map((service) => (
                                     <TableRow key={service.id}>
                                         <TableCell className="font-medium">{service.name}</TableCell>
                                         <TableCell>{service.designation}</TableCell>
                                         <TableCell>••••••••</TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => openDialog(service)} disabled={['FINANCES', 'COMMANDE PUBLIQUE'].includes(service.id)}>
+                                            <Button variant="ghost" size="icon" onClick={() => openDialog(service)}>
                                                 <Edit className="h-4 w-4" />
                                             </Button>
                                             <Button variant="ghost" size="icon" onClick={() => deleteService(service.id)} disabled={['FINANCES', 'COMMANDE PUBLIQUE'].includes(service.id)}>

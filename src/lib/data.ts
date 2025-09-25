@@ -18,7 +18,7 @@ export const SERVICES: Service[] = [
   { id: 'SGSPORTS', name: 'Sports', designation: 'Sports', password: '1234' },
   { id: 'SGSCOLAIRE', name: 'Scolaire', designation: 'Affaires Scolaires', password: '1234' },
   { id: 'SGCS', name: 'Centre Sociaux', designation: 'Centre Sociaux', password: '1234' },
-  { id: 'CCAS', name: 'CCAS', designation: 'Centre Communal d\'Action Sociale', password: '1234' },
+  { id: 'CCAS', name: 'CCAS', designation: 'CCAS', password: '1234' },
   { id: 'DRE', name: 'DRE', designation: 'DRE', password: '1234' },
   { id: 'SGPOLITVILLE', name: 'Politique de la Ville', designation: 'Politique de la Ville', password: '1234' },
   { id: 'SAAD', name: 'SAAD', designation: 'SAAD', password: '1234' },
