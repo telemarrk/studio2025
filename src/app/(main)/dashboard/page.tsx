@@ -323,6 +323,16 @@ export default function DashboardPage() {
     const { currentUser, invoices, services, refreshData } = useApp();
     const [today, setToday] = React.useState(new Date());
 
+    const serviceManagementMap: { [key: string]: string[] } = {
+        'SGMULTIACC': ['SGRAM'],
+        'SGDG': ['SGELUS'],
+        'SGJURID': ['SGAFP'],
+        'SGST': ['SGGDSTRAV', 'SGENTRET'],
+        'SGCOMMUNIC': ['SGRECPT'],
+        'CCAS': ['SAAD'],
+        'SGRESTO': ['SGREPDOM'],
+    };
+
     React.useEffect(() => {
         const timer = setInterval(() => {
             setToday(new Date());
@@ -335,16 +345,6 @@ export default function DashboardPage() {
 
         const specialServices = ['CCAS', 'SAAD', 'DRE'];
         const excludedForCP = ['CCAS', 'SAAD', 'DRE', 'SGFINANCES'];
-
-        const serviceManagementMap: { [key: string]: string[] } = {
-            'SGMULTIACC': ['SGRAM'],
-            'SGDG': ['SGELUS'],
-            'SGJURID': ['SGAFP'],
-            'SGST': ['SGGDSTRAV', 'SGENTRET'],
-            'SGCOMMUNIC': ['SGRECPT'],
-            'CCAS': ['SAAD'],
-            'SGRESTO': ['SGREPDOM'],
-        };
 
         switch (currentUser.role) {
             case 'FINANCES':
@@ -372,7 +372,7 @@ export default function DashboardPage() {
             default:
                 return [];
         }
-    }, [currentUser, invoices]);
+    }, [currentUser, invoices, serviceManagementMap]);
 
     const stats = React.useMemo(() => {
         if (!currentUser) return {};
@@ -398,14 +398,15 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'SERVICE':
-                 const serviceInvoices = invoices.filter(inv => inv.service === currentUser.id && inv.status !== 'Rejeté Service');
+                 const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
+                 const serviceInvoices = invoices.filter(inv => managedServices.includes(inv.service) && inv.status !== 'Rejeté Service');
                 return {
                     'Total Factures': serviceInvoices.length,
                 };
             default: 
                 return {};
         }
-    }, [currentUser, invoices]);
+    }, [currentUser, invoices, serviceManagementMap]);
     
     const statIcons: {[key: string]: React.ElementType} = {
         'À Traiter': Hourglass,
@@ -547,4 +548,3 @@ export default function DashboardPage() {
     
 
     
-
