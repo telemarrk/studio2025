@@ -12,7 +12,6 @@ export const SERVICES: Service[] = [
   { id: 'SGTHEATRE', name: 'Théâtre', designation: 'Théâtre Municipal', password: '1234' },
   { id: 'SGPOLICE', name: 'Police Municipale', designation: 'Police Municipale', password: '1234' },
   { id: 'SGRH', name: 'Ressources Humaines', designation: 'Ressources Humaines', password: '1234' },
-  { id: 'SGFINANCES', name: 'Finances (SG)', designation: 'Finances (SG)', password: '1234' },
   { id: 'SGPROPURB', name: 'Propreté Urbaine', designation: 'Propreté Urbaine', password: '1234' },
   { id: 'SGESPVERTS', name: 'Espaces Verts', designation: 'Espaces Verts', password: '1234' },
   { id: 'SGSPORTS', name: 'Sports', designation: 'Sports', password: '1234' },
@@ -32,7 +31,10 @@ export const SERVICES: Service[] = [
   { id: 'SGRAM', name: 'RAM', designation: 'RAM', password: '1234' },
   { id: 'SGGDSTRAV', name: 'Grands Travaux', designation: 'Grands Travaux', password: '1234' },
   { id: 'SGMAGASIN', name: 'Magasin', designation: 'Magasin Municipal', password: '1234' },
-  { id: 'SGCOMPUB', name: 'Comptabilité Publique', designation: 'Comptabilité Publique', password: '1234' },
+  { id: 'SGELUS', name: 'Elus', designation: 'Elus', password: '1234' },
+  { id: 'SGENTRET', name: 'Entretien', designation: 'Entretien', password: '1234' },
+  { id: 'SGRECPT', name: 'Réception', designation: 'Réception', password: '1234' },
+  { id: 'SGREPDOM', name: 'Repas à domicile', designation: 'Repas à domicile', password: '1234' },
 ];
 
 const parseFileName = (fileName: string): Pick<Invoice, 'service' | 'depositDate' | 'expenseType' | 'amount' | 'isInvalid'> => {
@@ -41,7 +43,6 @@ const parseFileName = (fileName: string): Pick<Invoice, 'service' | 'depositDate
   
   let isInvalid = false;
   
-  // SGRH-AUCHAN-05687-F-(452.65) -> 5 parts
   if (parts.length < 5) {
     isInvalid = true;
     return {
@@ -56,7 +57,7 @@ const parseFileName = (fileName: string): Pick<Invoice, 'service' | 'depositDate
   const [service, , , typeStr, amountStr] = parts;
 
   const specialServices = ['CCAS', 'SAAD', 'DRE'];
-  if (!service.startsWith('SG') && !specialServices.includes(service)) {
+  if (!service.startsWith('SG') && !specialServices.includes(service) && service !== 'COMMANDE' && service !== 'FINANCES') {
     isInvalid = true;
   }
 
@@ -76,8 +77,8 @@ const parseFileName = (fileName: string): Pick<Invoice, 'service' | 'depositDate
   }
 
   return {
-    service: service || 'INCONNU',
-    depositDate: new Date(), // Date logic is removed as it's not in the new filename format
+    service: service === 'COMMANDE' ? 'COMMANDE PUBLIQUE' : service || 'INCONNU',
+    depositDate: new Date(),
     expenseType,
     amount,
     isInvalid,
@@ -91,15 +92,19 @@ const initialInvoices: Omit<Invoice, 'id'>[] = [
   { fileName: 'CCAS-FOURNISSEURC-11223-F-(345.20).pdf', status: 'À traiter', cpRef: '', comments: [{id: 'c1', user: 'CCAS', text: 'Urgent svp.', timestamp: new Date()}], ...parseFileName('CCAS-FOURNISSEURC-11223-F-(345.20).pdf')},
   { fileName: 'SGSPORTS-EDF-33445-FL-(2100.75).pdf', status: 'Validé CP', cpRef: 'CP2024-001', comments: [{id: 'c2', user: 'Commande Publique', text: 'Validé.', timestamp: new Date()}], ...parseFileName('SGSPORTS-EDF-33445-FL-(2100.75).pdf')},
   { fileName: 'SGCULTURE-FNAC-55667-F-(830.00).pdf', status: 'À mandater', cpRef: 'CP2024-002', comments: [{id: 'c3-1', user: 'Commande Publique', text: 'OK pour moi', timestamp: new Date()}, {id: 'c3-2', user: 'SGCULTURE', text: 'Validé également', timestamp: new Date()}], ...parseFileName('SGCULTURE-FNAC-55667-F-(830.00).pdf')},
-  { fileName: 'SAAD-FOURNISSEURF-77889-F-(99.99).pdf', status: 'À mandater', cpRef: '', comments: [{id: 'c4', user: 'SAAD', text: 'Validé', timestamp: new Date()}], ...parseFileName('SAAD-FOURNISSEURF-77889-F-(99.99).pdf')},
   { fileName: 'SGRH-MANPOWER-99001-F-(120.00).pdf', status: 'Mandatée', cpRef: 'CP2024-003', comments: [], ...parseFileName('SGRH-MANPOWER-99001-F-(120.00).pdf')},
-  { fileName: 'SGDCVTP-COLAS-11121-I-(15000.00).pdf', status: 'Mandatée', cpRef: 'CP2024-004', comments: [], ...parseFileName('SGDCVTP-COLAS-11121-I-(15000.00).pdf')},
   { fileName: 'SGJURID-LEXISNEXIS-31415-F-(550.00).pdf', status: 'Rejeté CP', cpRef: 'CP2024-005', comments: [{id: 'c5', user: 'Commande Publique', text: 'Facture non conforme', timestamp: new Date()}], ...parseFileName('SGJURID-LEXISNEXIS-31415-F-(550.00).pdf')},
   { fileName: 'SGSCOLAIRE-MAJUSCULE-16180-F-(2300.00).pdf', status: 'Rejeté Service', cpRef: 'CP2024-006', comments: [{id: 'c6-1', user: 'Commande Publique', text: 'Ok', timestamp: new Date()}, {id: 'c6-2', user: 'SGSCOLAIRE', text: 'Refusé, matériel non livré.', timestamp: new Date()}], ...parseFileName('SGSCOLAIRE-MAJUSCULE-16180-F-(2300.00).pdf')},
   { fileName: 'URGENT_FOURNISSEURK_100.pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('URGENT_FOURNISSEURK_100.pdf')},
   { fileName: 'SGST-SULO-XYZ-X-(250.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGST-SULO-XYZ-X-(250.00).pdf')},
   { fileName: 'DRE-EIFFAGE-27182-I-(4200.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('DRE-EIFFAGE-27182-I-(4200.00).pdf')},
   { fileName: 'SGMAGASIN-BRICOMAN-31447-F-(680.30).pdf', status: 'À mandater', cpRef: 'CP2024-007', comments: [], ...parseFileName('SGMAGASIN-BRICOMAN-31447-F-(680.30).pdf')},
+  { fileName: 'COMMANDE-PAPETERIE-001-F-(150.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('COMMANDE-PAPETERIE-001-F-(150.00).pdf')},
+  { fileName: 'FINANCES-ASSURANCE-002-F-(2500.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('FINANCES-ASSURANCE-002-F-(2500.00).pdf')},
+  { fileName: 'SAAD-AIDESERVICE-54321-F-(250.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SAAD-AIDESERVICE-54321-F-(250.00).pdf') },
+  { fileName: 'SGELUS-RECEPTION-65432-F-(1200.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGELUS-RECEPTION-65432-F-(1200.00).pdf') },
+  { fileName: 'SGGDSTRAV-COLAS-76543-I-(15000.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGGDSTRAV-COLAS-76543-I-(15000.00).pdf') },
+  { fileName: 'SGAFP-FORMATION-87654-F-(800.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGAFP-FORMATION-87654-F-(800.00).pdf') },
 ];
 
 
