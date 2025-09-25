@@ -93,7 +93,7 @@ export default function LoginPage() {
                         <SelectContent>
                           {orderedServices.map((service) => (
                             <SelectItem key={service.id} value={service.id}>
-                              {service.name.replace('SG - ', '')}
+                              {service.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
