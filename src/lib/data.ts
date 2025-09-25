@@ -35,6 +35,8 @@ export const SERVICES: Service[] = [
   { id: 'SGENTRET', name: 'Entretien', designation: 'Entretien', password: '1234' },
   { id: 'SGRECPT', name: 'Réception', designation: 'Réception', password: '1234' },
   { id: 'SGREPDOM', name: 'Repas à domicile', designation: 'Repas à domicile', password: '1234' },
+  { id: 'SGFINANCES', name: 'Finances (SG)', designation: 'Finances (SG)', password: '1234' },
+  { id: 'SGCOMPUB', name: 'Comptabilité publique', designation: 'Comptabilité publique', password: '1234' },
 ];
 
 const parseFileName = (fileName: string): Pick<Invoice, 'service' | 'depositDate' | 'expenseType' | 'amount' | 'isInvalid'> => {
@@ -99,8 +101,8 @@ const initialInvoices: Omit<Invoice, 'id'>[] = [
   { fileName: 'SGST-SULO-XYZ-X-(250.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGST-SULO-XYZ-X-(250.00).pdf')},
   { fileName: 'DRE-EIFFAGE-27182-I-(4200.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('DRE-EIFFAGE-27182-I-(4200.00).pdf')},
   { fileName: 'SGMAGASIN-BRICOMAN-31447-F-(680.30).pdf', status: 'À mandater', cpRef: 'CP2024-007', comments: [], ...parseFileName('SGMAGASIN-BRICOMAN-31447-F-(680.30).pdf')},
-  { fileName: 'COMMANDE-PAPETERIE-001-F-(150.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('COMMANDE-PAPETERIE-001-F-(150.00).pdf')},
-  { fileName: 'FINANCES-ASSURANCE-002-F-(2500.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('FINANCES-ASSURANCE-002-F-(2500.00).pdf')},
+  { fileName: 'SGCOMPUB-PAPETERIE-001-F-(150.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGCOMPUB-PAPETERIE-001-F-(150.00).pdf')},
+  { fileName: 'SGFINANCES-ASSURANCE-002-F-(2500.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGFINANCES-ASSURANCE-002-F-(2500.00).pdf')},
   { fileName: 'SAAD-AIDESERVICE-54321-F-(250.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SAAD-AIDESERVICE-54321-F-(250.00).pdf') },
   { fileName: 'SGELUS-RECEPTION-65432-F-(1200.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGELUS-RECEPTION-65432-F-(1200.00).pdf') },
   { fileName: 'SGGDSTRAV-COLAS-76543-I-(15000.00).pdf', status: 'À traiter', cpRef: '', comments: [], ...parseFileName('SGGDSTRAV-COLAS-76543-I-(15000.00).pdf') },
