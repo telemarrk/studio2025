@@ -21,7 +21,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -45,6 +44,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 
 const statusConfig: { [key in InvoiceStatus]: { icon: React.ElementType, color: string, label: string } } = {
@@ -165,7 +165,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
         <AlertDialog>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
+                     <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Rejeter</p></TooltipContent>
             </Tooltip>
@@ -306,7 +306,7 @@ const CpRefCell: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
 
 
 export default function DashboardPage() {
-    const { currentUser, invoices } = useApp();
+    const { currentUser, invoices, services } = useApp();
 
     const invoicesForUser = React.useMemo(() => {
         if (!currentUser) return [];
@@ -315,7 +315,7 @@ export default function DashboardPage() {
 
         switch (currentUser.role) {
             case 'FINANCES':
-                return invoices.filter(inv => inv.status === 'À mandater' || inv.status === 'Mandatée');
+                return invoices.filter(inv => inv.status === 'À mandater');
             case 'COMMANDE PUBLIQUE':
                 return invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
             case 'SERVICE':
@@ -454,7 +454,7 @@ export default function DashboardPage() {
                                                 <TableCell>
                                                     <CpRefCell invoice={invoice} />
                                                 </TableCell>
-                                                <TableCell>{invoice.service}</TableCell>
+                                                <TableCell>{services.find(s => s.id === invoice.service)?.designation || invoice.service}</TableCell>
                                                 <TableCell>
                                                     <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
                                                 </TableCell>
