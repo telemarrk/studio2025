@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { useApp } from "@/components/app-provider";
-import type { Invoice, InvoiceStatus } from "@/lib/types";
+import type { Invoice, InvoiceStatus, Comment } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 const statusConfig: { [key in InvoiceStatus]: { icon: React.ElementType, color: string, label: string } } = {
@@ -57,26 +69,97 @@ const statusColors: { [key in InvoiceStatus]: string } = {
 };
 
 
+const getInitials = (name: string) => {
+    const parts = name.split(' ');
+    if (parts.length > 1) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+};
+
+const CommentsSheet: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
+    const { addComment } = useApp();
+    const [newComment, setNewComment] = React.useState("");
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    const handleSubmit = () => {
+        if (newComment.trim()) {
+            addComment(invoice.id, newComment.trim());
+            setNewComment("");
+            setIsOpen(false);
+        }
+    };
+
+    return (
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+             <Tooltip>
+                <TooltipTrigger asChild>
+                    <SheetTrigger asChild>
+                         <Button size="icon" variant="ghost" className="relative h-9 w-9">
+                            <MessageSquare className="h-4 w-4" />
+                            {invoice.comments.length > 0 && (
+                                <Badge className="absolute -top-1 -right-2 h-4 w-4 justify-center rounded-full p-0 text-xs">
+                                    {invoice.comments.length}
+                                </Badge>
+                            )}
+                        </Button>
+                    </SheetTrigger>
+                </TooltipTrigger>
+                <TooltipContent><p>Commentaires ({invoice.comments.length})</p></TooltipContent>
+            </Tooltip>
+            <SheetContent className="flex flex-col">
+                <SheetHeader>
+                    <SheetTitle>Commentaires</SheetTitle>
+                    <SheetDescription>
+                        Échanges concernant la facture {invoice.fileName}.
+                    </SheetDescription>
+                </SheetHeader>
+                 <ScrollArea className="flex-1 pr-4">
+                    <div className="space-y-4">
+                        {invoice.comments.length > 0 ? (
+                            invoice.comments.map((comment) => (
+                                <div key={comment.id} className="flex items-start gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarFallback>{getInitials(comment.user)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">
+                                        <p className="font-semibold">{comment.user}</p>
+                                        <p className="text-muted-foreground">{comment.text}</p>
+                                        <p className="text-xs text-muted-foreground/70 mt-1">
+                                            {format(new Date(comment.timestamp), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-center text-sm text-muted-foreground py-8">Aucun commentaire pour le moment.</p>
+                        )}
+                    </div>
+                </ScrollArea>
+                <SheetFooter className="mt-auto pt-4 border-t">
+                     <div className="w-full space-y-2">
+                        <Label htmlFor="comment" className="sr-only">Nouveau commentaire</Label>
+                        <Textarea id="comment" placeholder="Ajouter un commentaire..." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
+                        <div className="flex justify-end gap-2">
+                            <SheetClose asChild>
+                                <Button variant="outline">Annuler</Button>
+                            </SheetClose>
+                            <Button onClick={handleSubmit} disabled={!newComment.trim()}>Envoyer</Button>
+                        </div>
+                    </div>
+                </SheetFooter>
+            </SheetContent>
+        </Sheet>
+    );
+};
+
+
 const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
-    const { currentUser, updateInvoiceStatus, updateInvoiceCpRef } = useApp();
-    const [cpRef, setCpRef] = React.useState(invoice.cpRef);
+    const { currentUser, updateInvoiceStatus } = useApp();
     const [comment, setComment] = React.useState('');
-    const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
     if (!currentUser) return null;
 
-    const handleCpRefUpdate = () => {
-        updateInvoiceCpRef(invoice.id, cpRef);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleCpRefUpdate();
-            setIsPopoverOpen(false);
-            e.preventDefault();
-        }
-    };
-    
     const renderRejectDialog = (status: 'Rejeté CP' | 'Rejeté Service' | 'Rejeté Finances') => (
         <AlertDialog>
             <Tooltip>
@@ -104,31 +187,9 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 if (invoice.status === 'À traiter') {
                     return (
                         <>
-                            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <PopoverTrigger asChild>
-                                            <Button size="icon" variant="outline" className="h-9 w-9">
-                                                <FilePen className="h-4 w-4" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Saisir Réf. CP</p></TooltipContent>
-                                </Tooltip>
-                                <PopoverContent className="w-48 p-2">
-                                     <Input
-                                        placeholder="Réf. CP"
-                                        value={cpRef}
-                                        onChange={(e) => setCpRef(e.target.value)}
-                                        maxLength={14}
-                                        onKeyDown={handleKeyDown}
-                                        className="h-9"
-                                    />
-                                </PopoverContent>
-                            </Popover>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button size="icon" className="h-9 w-9" onClick={() => { handleCpRefUpdate(); updateInvoiceStatus(invoice.id, 'Validé CP'); }} disabled={!cpRef}>
+                                    <Button size="icon" className="h-9 w-9" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')} disabled={!invoice.cpRef}>
                                         <Check className="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
@@ -188,15 +249,58 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 </TooltipTrigger>
                 <TooltipContent><p>Visualiser</p></TooltipContent>
             </Tooltip>
-             <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-9 w-9">
-                        <MessageSquare className="h-4 w-4" />
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent><p>Commentaires ({invoice.comments.length})</p></TooltipContent>
-            </Tooltip>
+            <CommentsSheet invoice={invoice} />
             {renderActions()}
+        </div>
+    );
+};
+
+const CpRefCell: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
+    const { currentUser, updateInvoiceCpRef } = useApp();
+    const [cpRef, setCpRef] = React.useState(invoice.cpRef);
+    const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
+    const handleCpRefUpdate = () => {
+        updateInvoiceCpRef(invoice.id, cpRef);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleCpRefUpdate();
+            setIsPopoverOpen(false);
+            e.preventDefault();
+        }
+    };
+
+    const canEdit = currentUser?.role === 'COMMANDE PUBLIQUE' && invoice.status === 'À traiter';
+
+    return (
+        <div className="flex items-center gap-2">
+            <span>{invoice.cpRef}</span>
+            {canEdit && (
+                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <PopoverTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-7 w-7">
+                                    <FilePen className="h-4 w-4" />
+                                </Button>
+                            </PopoverTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Saisir/Modifier Réf. CP</p></TooltipContent>
+                    </Tooltip>
+                    <PopoverContent className="w-48 p-2">
+                        <Input
+                            placeholder="Réf. CP"
+                            value={cpRef}
+                            onChange={(e) => setCpRef(e.target.value)}
+                            maxLength={14}
+                            onKeyDown={handleKeyDown}
+                            className="h-9"
+                        />
+                    </PopoverContent>
+                </Popover>
+            )}
         </div>
     );
 };
@@ -319,7 +423,9 @@ export default function DashboardPage() {
                                                 <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
                                                 <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
                                                 <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
-                                                <TableCell>{invoice.cpRef}</TableCell>
+                                                <TableCell>
+                                                    <CpRefCell invoice={invoice} />
+                                                </TableCell>
                                                 <TableCell>
                                                     <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
                                                 </TableCell>
@@ -346,3 +452,6 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
+
+
+    
