@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X, FilePen, Send, Hourglass, Banknote, Building, FileText, Eye, MessageSquare, FileUp, FileDown } from "lucide-react";
+import { Check, X, FilePen, Send, Hourglass, Banknote, Building, FileText, Eye, MessageSquare, FileUp, FileDown, RefreshCw } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -288,7 +287,7 @@ const CpRefCell: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
 
 
 export default function DashboardPage() {
-    const { currentUser, invoices, services } = useApp();
+    const { currentUser, invoices, services, refreshData } = useApp();
     const [today, setToday] = React.useState(new Date());
 
     React.useEffect(() => {
@@ -381,18 +380,27 @@ export default function DashboardPage() {
     };
     
     const RoleIcon = getRoleIcon();
+    const showRefreshButton = ['FINANCES', 'COMMANDE PUBLIQUE'].includes(currentUser.role);
 
     return (
         <TooltipProvider>
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center gap-4">
-                            <RoleIcon className="h-8 w-8 text-primary" />
-                            <div>
-                                <CardTitle className="text-2xl font-headline">Tableau de bord</CardTitle>
-                                <CardDescription>Factures nécessitant votre attention</CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <RoleIcon className="h-8 w-8 text-primary" />
+                                <div>
+                                    <CardTitle className="text-2xl font-headline">Tableau de bord</CardTitle>
+                                    <CardDescription>Factures nécessitant votre attention</CardDescription>
+                                </div>
                             </div>
+                            {showRefreshButton && (
+                                <Button onClick={refreshData}>
+                                    <RefreshCw className="mr-2 h-4 w-4" />
+                                    Actualiser
+                                </Button>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -476,3 +484,5 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
+
+    
