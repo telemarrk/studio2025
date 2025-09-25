@@ -131,11 +131,12 @@ export default function HistoryPage() {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
-                                        <TableHead>Service</TableHead>
-                                        <TableHead>Type</TableHead>
-                                        <TableHead className="text-right">Montant TTC</TableHead>
-                                        <TableHead>Statut</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
+                                        <TableHead>Type de dépenses</TableHead>
+                                        <TableHead className="text-right">Montant TTC</TableHead>
+                                        <TableHead>Réf. CP</TableHead>
+                                        <TableHead>Service</TableHead>
+                                        <TableHead>Statut</TableHead>
                                         {currentUser.role === 'FINANCES' && <TableHead className="text-center">Actions</TableHead>}
                                     </TableRow>
                                 </TableHeader>
@@ -144,13 +145,14 @@ export default function HistoryPage() {
                                         filteredInvoices.map((invoice) => (
                                             <TableRow key={invoice.id}>
                                                 <TableCell className="font-medium">{invoice.fileName}</TableCell>
-                                                <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
+                                                <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
                                                 <TableCell>{invoice.expenseType}</TableCell>
                                                 <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
+                                                <TableCell>{invoice.cpRef}</TableCell>
+                                                <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
                                                 <TableCell>
                                                     <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
                                                 </TableCell>
-                                                <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
                                                 {currentUser.role === 'FINANCES' && (
                                                     <TableCell className="text-center">
                                                         <div className="flex justify-center items-center gap-2">
@@ -185,7 +187,7 @@ export default function HistoryPage() {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={currentUser.role === 'FINANCES' ? 7 : 6} className="h-24 text-center">
+                                            <TableCell colSpan={currentUser.role === 'FINANCES' ? 8 : 7} className="h-24 text-center">
                                                 Aucune facture ne correspond à vos filtres.
                                             </TableCell>
                                         </TableRow>
