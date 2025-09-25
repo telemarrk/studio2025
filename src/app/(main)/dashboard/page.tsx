@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -57,9 +58,10 @@ const statusColors: { [key in InvoiceStatus]: string } = {
 
 
 const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
-    const { currentUser, updateInvoiceStatus, updateInvoiceCpRef, addComment } = useApp();
+    const { currentUser, updateInvoiceStatus, updateInvoiceCpRef } = useApp();
     const [cpRef, setCpRef] = React.useState(invoice.cpRef);
     const [comment, setComment] = React.useState('');
+    const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
     if (!currentUser) return null;
 
@@ -67,52 +69,78 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
         updateInvoiceCpRef(invoice.id, cpRef);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleCpRefUpdate();
+            setIsPopoverOpen(false);
+            e.preventDefault();
+        }
+    };
+    
+    const renderRejectDialog = (status: 'Rejeté CP' | 'Rejeté Service' | 'Rejeté Finances') => (
+        <AlertDialog>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild>
+                        <Button size="icon" variant="destructive" className="h-9 w-9"><X className="h-4 w-4" /></Button>
+                    </AlertDialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent><p>Rejeter</p></TooltipContent>
+            </Tooltip>
+            <AlertDialogContent>
+                <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
+                <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => updateInvoiceStatus(invoice.id, status, comment)} disabled={!comment}>Confirmer le rejet</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+
     const renderActions = () => {
         switch (currentUser.role) {
             case 'COMMANDE PUBLIQUE':
                 if (invoice.status === 'À traiter') {
                     return (
                         <>
-                             <div className="flex items-center gap-2">
-                                <Input
-                                    placeholder="Réf. CP"
-                                    value={cpRef}
-                                    onChange={(e) => setCpRef(e.target.value)}
-                                    className="w-32 h-9"
-                                />
+                            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button size="icon" className="h-9 w-9" onClick={() => { handleCpRefUpdate(); updateInvoiceStatus(invoice.id, 'Validé CP'); }} disabled={!cpRef}>
-                                            <Check className="h-4 w-4" />
-                                        </Button>
+                                        <PopoverTrigger asChild>
+                                            <Button size="icon" variant="outline" className="h-9 w-9">
+                                                <FilePen className="h-4 w-4" />
+                                            </Button>
+                                        </PopoverTrigger>
                                     </TooltipTrigger>
-                                    <TooltipContent><p>Approuver</p></TooltipContent>
+                                    <TooltipContent><p>Saisir Réf. CP</p></TooltipContent>
                                 </Tooltip>
-                                <AlertDialog>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <AlertDialogTrigger asChild>
-                                                <Button size="icon" variant="destructive" className="h-9 w-9"><X className="h-4 w-4" /></Button>
-                                            </AlertDialogTrigger>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>Rejeter</p></TooltipContent>
-                                    </Tooltip>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
-                                        <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => updateInvoiceStatus(invoice.id, 'Rejeté CP', comment)} disabled={!comment}>Confirmer le rejet</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
+                                <PopoverContent className="w-48 p-2">
+                                     <Input
+                                        placeholder="Réf. CP"
+                                        value={cpRef}
+                                        onChange={(e) => setCpRef(e.target.value)}
+                                        maxLength={14}
+                                        onKeyDown={handleKeyDown}
+                                        className="h-9"
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button size="icon" className="h-9 w-9" onClick={() => { handleCpRefUpdate(); updateInvoiceStatus(invoice.id, 'Validé CP'); }} disabled={!cpRef}>
+                                        <Check className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>Approuver</p></TooltipContent>
+                            </Tooltip>
+                            {renderRejectDialog('Rejeté CP')}
                         </>
                     );
                 }
                 break;
             case 'SERVICE':
-                 if (invoice.status === 'Validé CP' || invoice.status === 'Rejeté Service') {
+                 if (invoice.status === 'Validé CP' || invoice.status === 'Rejeté Service' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) {
                     return (
                         <>
                             <Tooltip>
@@ -123,24 +151,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                                 </TooltipTrigger>
                                 <TooltipContent><p>Approuver</p></TooltipContent>
                             </Tooltip>
-                             <AlertDialog>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <AlertDialogTrigger asChild>
-                                            <Button size="icon" variant="destructive" className="h-9 w-9"><X className="h-4 w-4" /></Button>
-                                        </AlertDialogTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Rejeter</p></TooltipContent>
-                                </Tooltip>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
-                                    <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => updateInvoiceStatus(invoice.id, 'Rejeté Service', comment)} disabled={!comment}>Confirmer le rejet</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                            {renderRejectDialog('Rejeté Service')}
                         </>
                     );
                 }
@@ -157,24 +168,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                                 </TooltipTrigger>
                                 <TooltipContent><p>Mandater</p></TooltipContent>
                             </Tooltip>
-                             <AlertDialog>
-                                 <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <AlertDialogTrigger asChild>
-                                            <Button size="icon" variant="destructive" className="h-9 w-9"><X className="h-4 w-4" /></Button>
-                                        </AlertDialogTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Rejeter</p></TooltipContent>
-                                </Tooltip>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
-                                    <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => updateInvoiceStatus(invoice.id, 'Rejeté Finances', comment)} disabled={!comment}>Confirmer le rejet</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                            {renderRejectDialog('Rejeté Finances')}
                         </>
                     );
                 }
@@ -312,6 +306,7 @@ export default function DashboardPage() {
                                         <TableHead>Service</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
                                         <TableHead className="text-right">Montant</TableHead>
+                                        <TableHead>Réf. CP</TableHead>
                                         <TableHead>Statut</TableHead>
                                         <TableHead className="text-center">Actions</TableHead>
                                     </TableRow>
@@ -324,6 +319,7 @@ export default function DashboardPage() {
                                                 <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
                                                 <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
                                                 <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
+                                                <TableCell>{invoice.cpRef}</TableCell>
                                                 <TableCell>
                                                     <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
                                                 </TableCell>
@@ -336,7 +332,7 @@ export default function DashboardPage() {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="h-24 text-center">
+                                            <TableCell colSpan={7} className="h-24 text-center">
                                                 Aucune facture à traiter pour le moment.
                                             </TableCell>
                                         </TableRow>
