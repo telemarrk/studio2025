@@ -14,13 +14,15 @@ import type { Service } from "@/lib/types";
 const ServiceForm = ({ service, onSave, onCancel }: { service?: Service | null, onSave: (service: Omit<Service, 'id'> | Service) => void, onCancel: () => void }) => {
     const [name, setName] = React.useState(service?.name || '');
     const [designation, setDesignation] = React.useState(service?.designation || '');
+    const [password, setPassword] = React.useState(service?.password || '');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const serviceData = { name, designation, password };
         if (service) {
-            onSave({ ...service, name, designation });
+            onSave({ ...service, ...serviceData });
         } else {
-            onSave({ name, designation });
+            onSave(serviceData);
         }
     };
 
@@ -33,6 +35,10 @@ const ServiceForm = ({ service, onSave, onCancel }: { service?: Service | null, 
             <div>
                 <Label htmlFor="designation">Désignation</Label>
                 <Input id="designation" value={designation} onChange={e => setDesignation(e.target.value)} required />
+            </div>
+             <div>
+                <Label htmlFor="password">Mot de passe</Label>
+                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
             </div>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
@@ -97,6 +103,7 @@ export default function ServicesPage() {
                                 <TableRow>
                                     <TableHead>Nom</TableHead>
                                     <TableHead>Désignation</TableHead>
+                                    <TableHead>Mot de passe</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -105,6 +112,7 @@ export default function ServicesPage() {
                                     <TableRow key={service.id}>
                                         <TableCell className="font-medium">{service.name}</TableCell>
                                         <TableCell>{service.designation}</TableCell>
+                                        <TableCell>••••••••</TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="ghost" size="icon" onClick={() => openDialog(service)} disabled={['FINANCES', 'COMMANDE PUBLIQUE'].includes(service.id)}>
                                                 <Edit className="h-4 w-4" />

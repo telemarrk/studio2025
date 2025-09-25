@@ -58,16 +58,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [currentUser, pathname, router, isLoading]);
 
   const login = (serviceId: string, password: string): boolean => {
-    if (password === '1234') {
-      const service = services.find(s => s.id === serviceId);
-      if (service) {
-        const role = service.id === 'FINANCES' ? 'FINANCES' : service.id === 'COMMANDE PUBLIQUE' ? 'COMMANDE PUBLIQUE' : 'SERVICE';
-        const user: CurrentUser = { id: service.id, name: service.name, role };
-        setCurrentUser(user);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        toast({ title: "Connexion réussie", description: `Bienvenue, ${service.name}!` });
-        return true;
-      }
+    const service = services.find(s => s.id === serviceId);
+    if (service && service.password === password) {
+      const role = service.id === 'FINANCES' ? 'FINANCES' : service.id === 'COMMANDE PUBLIQUE' ? 'COMMANDE PUBLIQUE' : 'SERVICE';
+      const user: CurrentUser = { id: service.id, name: service.name, role };
+      setCurrentUser(user);
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      toast({ title: "Connexion réussie", description: `Bienvenue, ${service.name}!` });
+      return true;
     }
     toast({ variant: "destructive", title: "Erreur de connexion", description: "Le service ou le mot de passe est incorrect." });
     return false;

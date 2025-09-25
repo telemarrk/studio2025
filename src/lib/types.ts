@@ -2,6 +2,7 @@ export type Service = {
   id: string;
   name: string;
   designation: string;
+  password?: string;
 };
 
 export type UserRole = 
