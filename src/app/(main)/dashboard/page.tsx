@@ -319,7 +319,7 @@ export default function DashboardPage() {
             case 'FINANCES':
                 return invoices.filter(inv => inv.status === 'À mandater' || inv.status === 'Mandatée');
             case 'COMMANDE PUBLIQUE':
-                return invoices; // Show all invoices for the stats calculation
+                return invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
             case 'SERVICE':
                  if (specialServices.includes(currentUser.id)) {
                     return invoices.filter(inv => inv.service === currentUser.id && (inv.status === 'À traiter' || inv.status === 'Rejeté Service'));
@@ -330,16 +330,6 @@ export default function DashboardPage() {
         }
     }, [currentUser, invoices]);
 
-    const tableInvoices = React.useMemo(() => {
-        if (!currentUser) return [];
-        const specialServices = ['CCAS', 'SAAD', 'DRE'];
-
-        if(currentUser.role === 'COMMANDE PUBLIQUE') {
-            return invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
-        }
-        return invoicesForUser;
-    }, [currentUser, invoices, invoicesForUser]);
-    
     const stats = React.useMemo(() => {
         if (!currentUser) return {};
         
@@ -347,10 +337,12 @@ export default function DashboardPage() {
 
         switch (currentUser.role) {
             case 'COMMANDE PUBLIQUE':
+                const specialServices = ['CCAS', 'SAAD', 'DRE'];
+                const cpInvoices = invoices.filter(inv => !specialServices.includes(inv.service));
                 return {
-                    'À Traiter': allInvoicesForRole.filter(i => i.status === 'À traiter').length,
-                    'Factures rejetées par la CP': allInvoicesForRole.filter(i => i.status === 'Rejeté CP').length,
-                    'Factures Rejetées par les services': allInvoicesForRole.filter(i => i.status === 'Rejeté Service').length,
+                    'À Traiter': cpInvoices.filter(i => i.status === 'À traiter').length,
+                    'Factures rejetées par la CP': cpInvoices.filter(i => i.status === 'Rejeté CP').length,
+                    'Factures Rejetées par les services': cpInvoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'FINANCES':
                 return {
@@ -453,8 +445,8 @@ export default function DashboardPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {tableInvoices.length > 0 ? (
-                                        tableInvoices.map((invoice) => (
+                                    {invoicesForUser.length > 0 ? (
+                                        invoicesForUser.map((invoice) => (
                                             <TableRow key={invoice.id} className={invoice.isInvalid ? 'bg-red-900/20' : ''}>
                                                 <TableCell className="font-medium">{invoice.fileName}</TableCell>
                                                 <TableCell>{invoice.service}</TableCell>
