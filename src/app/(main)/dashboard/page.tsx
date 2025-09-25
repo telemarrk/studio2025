@@ -180,7 +180,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
     const renderActions = () => {
         switch (currentUser.role) {
             case 'COMMANDE PUBLIQUE':
-                if (invoice.status === 'À traiter') {
+                if (invoice.status === 'À traiter' && invoice.service !== 'SGCOMPUB') { // Standard CP validation
                     return (
                         <>
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')}>
@@ -189,6 +189,28 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                             {renderRejectDialog('Rejeté CP')}
                         </>
                     );
+                }
+                if (invoice.service === 'SGCOMPUB') {
+                    if (invoice.status === 'À traiter') { // First CP validation (as CP)
+                         return (
+                            <>
+                                <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')}>
+                                    <Check className="h-4 w-4" />
+                                </Button>
+                                {renderRejectDialog('Rejeté CP')}
+                            </>
+                        );
+                    }
+                    if (invoice.status === 'Validé CP') { // Second CP validation (as Service)
+                        return (
+                            <>
+                                <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
+                                    <Check className="h-4 w-4" />
+                                </Button>
+                                {renderRejectDialog('Rejeté Service')}
+                            </>
+                        );
+                    }
                 }
                 break;
             case 'SERVICE':
@@ -211,6 +233,16 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                                 <Check className="h-4 w-4" />
                             </Button>
                             {renderRejectDialog('Rejeté Finances')}
+                        </>
+                    );
+                }
+                if (invoice.service === 'SGFINANCES' && invoice.status === 'À traiter') {
+                    return (
+                        <>
+                            <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
+                                <Check className="h-4 w-4" />
+                            </Button>
+                            {renderRejectDialog('Rejeté Service')}
                         </>
                     );
                 }
@@ -316,9 +348,20 @@ export default function DashboardPage() {
 
         switch (currentUser.role) {
             case 'FINANCES':
-                return invoices.filter(inv => inv.status === 'À mandater' || inv.service === 'SGFINANCES');
+                return invoices.filter(inv => 
+                    inv.status === 'À mandater' || 
+                    (inv.service === 'SGFINANCES' && inv.status === 'À traiter')
+                );
             case 'COMMANDE PUBLIQUE':
-                return invoices.filter(inv => (inv.status === 'À traiter' && !excludedForCP.includes(inv.service)) || inv.service === 'COMMANDE PUBLIQUE');
+                return invoices.filter(inv => {
+                    if (excludedForCP.includes(inv.service)) {
+                        return false;
+                    }
+                    if (inv.service === 'SGCOMPUB') {
+                        return inv.status === 'À traiter' || inv.status === 'Validé CP';
+                    }
+                    return inv.status === 'À traiter';
+                });
             case 'SERVICE':
                 const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
                 
