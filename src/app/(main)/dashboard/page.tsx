@@ -214,7 +214,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 }
                 break;
             case 'SERVICE':
-                 if (invoice.status === 'Validé CP' || invoice.status === 'Rejeté Service' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) {
+                 if (invoice.status === 'Validé CP' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) {
                     return (
                         <>
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
@@ -366,9 +366,9 @@ export default function DashboardPage() {
                 const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
                 
                 if (specialServices.includes(currentUser.id)) {
-                    return invoices.filter(inv => managedServices.includes(inv.service) && (inv.status === 'À traiter' || inv.status === 'Rejeté Service'));
+                    return invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'À traiter');
                 }
-                return invoices.filter(inv => managedServices.includes(inv.service) && (inv.status === 'Validé CP' || inv.status === 'Rejeté Service'));
+                return invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'Validé CP');
             default:
                 return [];
         }
@@ -547,4 +547,5 @@ export default function DashboardPage() {
     
 
     
+
 
