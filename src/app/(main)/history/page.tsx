@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { useApp } from "@/components/app-provider";
-import type { Invoice, InvoiceStatus, Service, ExpenseType } from "@/lib/types";
+import type { Invoice, InvoiceStatus, Service, ExpenseType, Comment } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Undo2, CheckCheck, Search } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +23,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -53,6 +61,10 @@ export default function HistoryPage() {
     const [isRevertDialogOpen, setIsRevertDialogOpen] = React.useState(false);
     const [selectedInvoiceForRevert, setSelectedInvoiceForRevert] = React.useState<Invoice | null>(null);
     const [revertPassword, setRevertPassword] = React.useState("");
+
+    const [isRejectionDialogOpen, setIsRejectionDialogOpen] = React.useState(false);
+    const [selectedRejectionComment, setSelectedRejectionComment] = React.useState<Comment | null>(null);
+
 
     React.useEffect(() => {
         const timer = setInterval(() => {
@@ -100,6 +112,11 @@ export default function HistoryPage() {
                 description: "Mot de passe incorrect.",
             });
         }
+    };
+    
+    const handleRejectionClick = (comment: Comment) => {
+        setSelectedRejectionComment(comment);
+        setIsRejectionDialogOpen(true);
     };
 
     if (!currentUser || !['FINANCES', 'COMMANDE PUBLIQUE'].includes(currentUser.role)) {
@@ -212,15 +229,13 @@ export default function HistoryPage() {
                                                     <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
                                                     <TableCell>
                                                         {isRejected && rejectionComment ? (
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <Badge className={cn("text-white cursor-help", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent>
-                                                                    <p className="font-semibold">{rejectionComment.user} a écrit :</p>
-                                                                    <p>{rejectionComment.text}</p>
-                                                                </TooltipContent>
-                                                            </Tooltip>
+                                                            <Badge 
+                                                                className={cn("text-white cursor-pointer", statusColors[invoice.status])} 
+                                                                variant="default"
+                                                                onClick={() => handleRejectionClick(rejectionComment)}
+                                                            >
+                                                                {invoice.status}
+                                                            </Badge>
                                                         ) : (
                                                             <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
                                                         )}
@@ -299,6 +314,19 @@ export default function HistoryPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            
+            <Dialog open={isRejectionDialogOpen} onOpenChange={setIsRejectionDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Motif du rejet</DialogTitle>
+                        <DialogDescription>
+                            Commentaire laissé par {selectedRejectionComment?.user} le {selectedRejectionComment && format(selectedRejectionComment.timestamp, 'dd/MM/yyyy HH:mm', { locale: fr })}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <p className="py-4">{selectedRejectionComment?.text}</p>
+                </DialogContent>
+            </Dialog>
+
         </TooltipProvider>
     );
 }
