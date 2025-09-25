@@ -51,11 +51,6 @@ export function UserNav() {
         <DropdownMenuGroup>
           {/* Add other items here if needed */}
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Déconnexion</span>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
