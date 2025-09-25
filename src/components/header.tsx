@@ -6,7 +6,7 @@ import { useApp } from "./app-provider";
 import { FullScreenToggle } from "./full-screen-toggle";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider } from "./ui/tooltip";
 
 export default function AppHeader() {
   const { currentUser, logout } = useApp();
@@ -16,7 +16,7 @@ export default function AppHeader() {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 py-4">
       <div className="flex items-center gap-2">
-        <SidebarTrigger className={!showSidebarTrigger ? 'md:hidden' : ''} />
+        {showSidebarTrigger && <SidebarTrigger />}
         <h1 className="text-xl font-semibold font-headline">{currentUser?.name}</h1>
       </div>
       
