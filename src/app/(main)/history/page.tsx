@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Undo2, CheckCheck, Search } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,14 @@ export default function HistoryPage() {
     const [expenseTypeFilter, setExpenseTypeFilter] = React.useState("all");
     const [amountFilter, setAmountFilter] = React.useState("");
     const [statusFilter, setStatusFilter] = React.useState("all");
+    const [today, setToday] = React.useState(new Date());
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setToday(new Date());
+        }, 1000 * 60 * 60 * 24); // Update once a day
+        return () => clearInterval(timer);
+    }, []);
 
     const filteredInvoices = React.useMemo(() => {
         let invoicesToShow = invoices;
@@ -137,6 +145,7 @@ export default function HistoryPage() {
                                         <TableHead>Réf. CP</TableHead>
                                         <TableHead>Service</TableHead>
                                         <TableHead>Statut</TableHead>
+                                        <TableHead>Échéance</TableHead>
                                         {currentUser.role === 'FINANCES' && <TableHead className="text-center">Actions</TableHead>}
                                     </TableRow>
                                 </TableHeader>
@@ -152,6 +161,9 @@ export default function HistoryPage() {
                                                 <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
                                                 <TableCell>
                                                     <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {invoice.status === 'Mandatée' ? 0 : differenceInDays(today, invoice.depositDate)} jours
                                                 </TableCell>
                                                 {currentUser.role === 'FINANCES' && (
                                                     <TableCell className="text-center">
@@ -187,7 +199,7 @@ export default function HistoryPage() {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={currentUser.role === 'FINANCES' ? 8 : 7} className="h-24 text-center">
+                                            <TableCell colSpan={currentUser.role === 'FINANCES' ? 9 : 8} className="h-24 text-center">
                                                 Aucune facture ne correspond à vos filtres.
                                             </TableCell>
                                         </TableRow>

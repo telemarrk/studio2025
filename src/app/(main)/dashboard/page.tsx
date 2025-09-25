@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X, FilePen, Send, Hourglass, Banknote, Building, FileText, Eye, MessageSquare, FileUp, FileDown } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import {
@@ -291,6 +291,14 @@ const CpRefCell: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
 
 export default function DashboardPage() {
     const { currentUser, invoices, services } = useApp();
+    const [today, setToday] = React.useState(new Date());
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setToday(new Date());
+        }, 1000 * 60 * 60 * 24); // Update once a day
+        return () => clearInterval(timer);
+    }, []);
 
     const invoicesForUser = React.useMemo(() => {
         if (!currentUser) return [];
@@ -319,11 +327,11 @@ export default function DashboardPage() {
         
         switch (currentUser.role) {
             case 'COMMANDE PUBLIQUE':
-                const cpInvoices = invoices.filter(inv => !specialServices.includes(inv.service));
+                const cpInvoices = invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
                 return {
-                    'À Traiter': cpInvoices.filter(i => i.status === 'À traiter').length,
-                    'Factures rejetées par la CP': cpInvoices.filter(i => i.status === 'Rejeté CP').length,
-                    'Factures Rejetées par les services': cpInvoices.filter(i => i.status === 'Rejeté Service').length,
+                    'À Traiter': cpInvoices.length,
+                    'Factures rejetées par la CP': invoices.filter(i => i.status === 'Rejeté CP').length,
+                    'Factures Rejetées par les services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'FINANCES':
                  const financeInvoices = invoices.filter(inv => inv.status === 'À mandater');
@@ -425,6 +433,7 @@ export default function DashboardPage() {
                                         <TableHead>Réf. CP</TableHead>
                                         <TableHead>Service</TableHead>
                                         <TableHead>Statut</TableHead>
+                                        <TableHead>Échéance</TableHead>
                                         <TableHead className="text-center">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -443,6 +452,9 @@ export default function DashboardPage() {
                                                 <TableCell>
                                                     <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
                                                 </TableCell>
+                                                <TableCell>
+                                                    {invoice.status === 'Mandatée' ? 0 : differenceInDays(today, invoice.depositDate)} jours
+                                                </TableCell>
                                                 <TableCell className="text-center">
                                                     { invoice.isInvalid ? (
                                                          <Badge variant="destructive">Nom de fichier invalide</Badge>
@@ -452,7 +464,7 @@ export default function DashboardPage() {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={8} className="h-24 text-center">
+                                            <TableCell colSpan={9} className="h-24 text-center">
                                                 Aucune facture à traiter pour le moment.
                                             </TableCell>
                                         </TableRow>
@@ -466,5 +478,3 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
-
-    
