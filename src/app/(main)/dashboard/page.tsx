@@ -316,9 +316,9 @@ export default function DashboardPage() {
 
         switch (currentUser.role) {
             case 'FINANCES':
-                return invoices.filter(inv => inv.status === 'À mandater');
+                return invoices.filter(inv => inv.status === 'À mandater' || inv.service === 'SGFINANCES');
             case 'COMMANDE PUBLIQUE':
-                return invoices.filter(inv => inv.status === 'À traiter' && !excludedForCP.includes(inv.service));
+                return invoices.filter(inv => (inv.status === 'À traiter' && !excludedForCP.includes(inv.service)) || inv.service === 'COMMANDE PUBLIQUE');
             case 'SERVICE':
                 const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
                 
@@ -338,7 +338,7 @@ export default function DashboardPage() {
         
         switch (currentUser.role) {
             case 'COMMANDE PUBLIQUE':
-                const cpInvoices = invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
+                const cpInvoices = invoices.filter(inv => (inv.status === 'À traiter' && !specialServices.includes(inv.service)) || inv.service === 'COMMANDE PUBLIQUE');
                 return {
                     'À Traiter': cpInvoices.length,
                     'Factures rejetées par la CP': invoices.filter(i => i.status === 'Rejeté CP').length,
@@ -498,6 +498,8 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
+
+    
 
     
 
