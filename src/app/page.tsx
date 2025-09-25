@@ -48,9 +48,10 @@ export default function LoginPage() {
 
   const orderedServices = React.useMemo(() => {
     const specialServices = ['FINANCES', 'COMMANDE PUBLIQUE'];
+    const excludedServices = ['SAAD', 'SGGDSTRAV', 'SGRAM'];
     const special = services.filter(s => specialServices.includes(s.id));
     const others = services
-      .filter(s => !specialServices.includes(s.id))
+      .filter(s => !specialServices.includes(s.id) && !excludedServices.includes(s.id))
       .sort((a, b) => a.name.localeCompare(b.name));
     return [...special, ...others];
   }, [services]);
