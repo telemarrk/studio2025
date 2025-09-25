@@ -182,36 +182,36 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
             case 'COMMANDE PUBLIQUE':
                 if (invoice.status === 'À traiter') {
                     return (
-                        <>
+                        <div className="flex items-center gap-2">
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')}>
                                 <Check className="h-4 w-4" />
                             </Button>
                             {renderRejectDialog('Rejeté CP')}
-                        </>
+                        </div>
                     );
                 }
                 break;
             case 'SERVICE':
                  if (invoice.status === 'Validé CP' || invoice.status === 'Rejeté Service' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) {
                     return (
-                        <>
+                        <div className="flex items-center gap-2">
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
                                 <Check className="h-4 w-4" />
                             </Button>
                             {renderRejectDialog('Rejeté Service')}
-                        </>
+                        </div>
                     );
                 }
                 break;
             case 'FINANCES':
                 if (invoice.status === 'À mandater') {
                      return (
-                        <>
+                        <div className="flex items-center gap-2">
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Mandatée')}>
                                 <Check className="h-4 w-4" />
                             </Button>
                             {renderRejectDialog('Rejeté Finances')}
-                        </>
+                        </div>
                     );
                 }
                 break;
@@ -231,9 +231,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 <TooltipContent><p>Visualiser</p></TooltipContent>
             </Tooltip>
             <CommentsSheet invoice={invoice} />
-            <div className="flex items-center gap-2">
-                {renderActions()}
-            </div>
+            {renderActions()}
         </div>
     );
 };
@@ -347,8 +345,6 @@ export default function DashboardPage() {
                  const serviceInvoices = invoices.filter(inv => inv.service === currentUser.id);
                 return {
                     'Total Factures': serviceInvoices.length,
-                    'À traiter': serviceInvoices.filter(inv => ['À traiter', 'Validé CP'].includes(inv.status)).length,
-                    'Rejetées': serviceInvoices.filter(inv => inv.status.startsWith('Rejeté')).length,
                 };
         }
     }, [currentUser, invoices]);
