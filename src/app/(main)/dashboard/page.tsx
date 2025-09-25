@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X, FilePen, Send, Hourglass, Banknote, Building, FileText, Eye, MessageSquare } from "lucide-react";
+import { Check, X, FilePen, Send, Hourglass, Banknote, Building, FileText, Eye, MessageSquare, FileUp, FileDown } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -166,7 +165,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <AlertDialogTrigger asChild>
-                        <Button size="icon" variant="destructive" className="h-9 w-9"><X className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
                     </AlertDialogTrigger>
                 </TooltipTrigger>
                 <TooltipContent><p>Rejeter</p></TooltipContent>
@@ -190,7 +189,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                         <>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button size="icon" className="h-9 w-9" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')} disabled={!invoice.cpRef}>
+                                    <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')} disabled={!invoice.cpRef}>
                                         <Check className="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
@@ -207,7 +206,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                         <>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button size="icon" className="h-9 w-9" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
+                                    <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
                                         <Check className="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
@@ -224,7 +223,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                         <>
                              <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button size="icon" className="h-9 w-9" onClick={() => updateInvoiceStatus(invoice.id, 'Mandatée')}>
+                                    <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Mandatée')}>
                                         <Check className="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
@@ -308,7 +307,7 @@ const CpRefCell: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
 
 
 export default function DashboardPage() {
-    const { currentUser, invoices, services } = useApp();
+    const { currentUser, invoices } = useApp();
 
     const invoicesForUser = React.useMemo(() => {
         if (!currentUser) return [];
@@ -319,7 +318,7 @@ export default function DashboardPage() {
             case 'FINANCES':
                 return invoices.filter(inv => inv.status === 'À mandater' || inv.status === 'Mandatée');
             case 'COMMANDE PUBLIQUE':
-                return invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
+                return invoices; // Show all invoices for the stats calculation
             case 'SERVICE':
                  if (specialServices.includes(currentUser.id)) {
                     return invoices.filter(inv => inv.service === currentUser.id && (inv.status === 'À traiter' || inv.status === 'Rejeté Service'));
@@ -329,13 +328,60 @@ export default function DashboardPage() {
                 return [];
         }
     }, [currentUser, invoices]);
+
+    const tableInvoices = React.useMemo(() => {
+        if (!currentUser) return [];
+        const specialServices = ['CCAS', 'SAAD', 'DRE'];
+
+        if(currentUser.role === 'COMMANDE PUBLIQUE') {
+            return invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
+        }
+        return invoicesForUser;
+    }, [currentUser, invoicesForUser]);
     
     const stats = React.useMemo(() => {
-        const total = invoicesForUser.length;
-        const toProcess = invoicesForUser.filter(inv => ['À traiter', 'Validé CP', 'À mandater'].includes(inv.status)).length;
-        const rejected = invoicesForUser.filter(inv => inv.status.startsWith('Rejeté')).length;
-        return { total, toProcess, rejected };
-    }, [invoicesForUser]);
+        if (!currentUser) return {};
+        
+        switch (currentUser.role) {
+            case 'COMMANDE PUBLIQUE':
+                return {
+                    'À Traiter': invoicesForUser.filter(i => i.status === 'À traiter').length,
+                    'Factures rejetées par la CP': invoicesForUser.filter(i => i.status === 'Rejeté CP').length,
+                    'Factures Rejetées par les services': invoicesForUser.filter(i => i.status === 'Rejeté Service').length,
+                };
+            case 'FINANCES':
+                return {
+                    'Factures à Mandater': invoicesForUser.filter(i => i.status === 'À mandater').length,
+                    'Fonctionnement': invoicesForUser.filter(i => i.expenseType === 'Fonctionnement').length,
+                    'Fluide': invoicesForUser.filter(i => i.expenseType === 'Fluide').length,
+                    'Investissement': invoicesForUser.filter(i => i.expenseType === 'Investissement').length,
+                    'Rejet CP': invoicesForUser.filter(i => i.status === 'Rejeté CP').length,
+                    'Rejet Services': invoicesForUser.filter(i => i.status === 'Rejeté Service').length,
+                };
+            default: // SERVICE role
+                return {
+                    'Total Factures': invoicesForUser.length,
+                    'À traiter': invoicesForUser.filter(inv => ['À traiter', 'Validé CP', 'À mandater'].includes(inv.status)).length,
+                    'Rejetées': invoicesForUser.filter(inv => inv.status.startsWith('Rejeté')).length,
+                };
+        }
+    }, [invoicesForUser, currentUser]);
+    
+    const statIcons: {[key: string]: React.ElementType} = {
+        'À Traiter': Hourglass,
+        'Factures rejetées par la CP': FileDown,
+        'Factures Rejetées par les services': FileDown,
+        'Factures à Mandater': Send,
+        'Fonctionnement': FileText,
+        'Fluide': FileText,
+        'Investissement': FileText,
+        'Rejet CP': X,
+        'Rejet Services': X,
+        'Total Factures': FileText,
+        'À traiter': Hourglass,
+        'Rejetées': X,
+    }
+
 
     if (!currentUser) {
         return <div className="flex h-full items-center justify-center"><p>Chargement des données utilisateur...</p></div>;
@@ -366,34 +412,21 @@ export default function DashboardPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                         <div className="grid gap-4 md:grid-cols-3">
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Total Factures</CardTitle>
-                                    <FileText className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{stats.total}</div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">À traiter</CardTitle>
-                                    <Hourglass className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{stats.toProcess}</div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Rejetées</CardTitle>
-                                    <X className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{stats.rejected}</div>
-                                </CardContent>
-                            </Card>
+                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {Object.entries(stats).map(([title, value]) => {
+                                const Icon = statIcons[title] || FileText;
+                                return (
+                                    <Card key={title}>
+                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                                            <Icon className="h-4 w-4 text-muted-foreground" />
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold">{value}</div>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            })}
                         </div>
                     </CardContent>
                 </Card>
@@ -417,11 +450,11 @@ export default function DashboardPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {invoicesForUser.length > 0 ? (
-                                        invoicesForUser.map((invoice) => (
+                                    {tableInvoices.length > 0 ? (
+                                        tableInvoices.map((invoice) => (
                                             <TableRow key={invoice.id} className={invoice.isInvalid ? 'bg-red-900/20' : ''}>
                                                 <TableCell className="font-medium">{invoice.fileName}</TableCell>
-                                                <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
+                                                <TableCell>{invoice.service}</TableCell>
                                                 <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
                                                 <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
                                                 <TableCell>
@@ -453,6 +486,5 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
-
 
     
