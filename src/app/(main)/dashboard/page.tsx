@@ -21,6 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -337,26 +338,28 @@ export default function DashboardPage() {
             return invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
         }
         return invoicesForUser;
-    }, [currentUser, invoicesForUser]);
+    }, [currentUser, invoices, invoicesForUser]);
     
     const stats = React.useMemo(() => {
         if (!currentUser) return {};
         
+        const allInvoicesForRole = currentUser.role === 'COMMANDE PUBLIQUE' ? invoices : invoicesForUser;
+
         switch (currentUser.role) {
             case 'COMMANDE PUBLIQUE':
                 return {
-                    'À Traiter': invoicesForUser.filter(i => i.status === 'À traiter').length,
-                    'Factures rejetées par la CP': invoicesForUser.filter(i => i.status === 'Rejeté CP').length,
-                    'Factures Rejetées par les services': invoicesForUser.filter(i => i.status === 'Rejeté Service').length,
+                    'À Traiter': allInvoicesForRole.filter(i => i.status === 'À traiter').length,
+                    'Factures rejetées par la CP': allInvoicesForRole.filter(i => i.status === 'Rejeté CP').length,
+                    'Factures Rejetées par les services': allInvoicesForRole.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'FINANCES':
                 return {
-                    'Factures à Mandater': invoicesForUser.filter(i => i.status === 'À mandater').length,
-                    'Fonctionnement': invoicesForUser.filter(i => i.expenseType === 'Fonctionnement').length,
-                    'Fluide': invoicesForUser.filter(i => i.expenseType === 'Fluide').length,
-                    'Investissement': invoicesForUser.filter(i => i.expenseType === 'Investissement').length,
-                    'Rejet CP': invoicesForUser.filter(i => i.status === 'Rejeté CP').length,
-                    'Rejet Services': invoicesForUser.filter(i => i.status === 'Rejeté Service').length,
+                    'Factures à Mandater': allInvoicesForRole.filter(i => i.status === 'À mandater').length,
+                    'Fonctionnement': allInvoicesForRole.filter(i => i.expenseType === 'Fonctionnement').length,
+                    'Fluide': allInvoicesForRole.filter(i => i.expenseType === 'Fluide').length,
+                    'Investissement': allInvoicesForRole.filter(i => i.expenseType === 'Investissement').length,
+                    'Rejet CP': allInvoicesForRole.filter(i => i.status === 'Rejeté CP').length,
+                    'Rejet Services': allInvoicesForRole.filter(i => i.status === 'Rejeté Service').length,
                 };
             default: // SERVICE role
                 return {
@@ -365,7 +368,7 @@ export default function DashboardPage() {
                     'Rejetées': invoicesForUser.filter(inv => inv.status.startsWith('Rejeté')).length,
                 };
         }
-    }, [invoicesForUser, currentUser]);
+    }, [invoicesForUser, currentUser, invoices]);
     
     const statIcons: {[key: string]: React.ElementType} = {
         'À Traiter': Hourglass,
