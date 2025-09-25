@@ -182,36 +182,36 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
             case 'COMMANDE PUBLIQUE':
                 if (invoice.status === 'À traiter') {
                     return (
-                        <div className="flex items-center gap-2">
+                        <>
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')}>
                                 <Check className="h-4 w-4" />
                             </Button>
                             {renderRejectDialog('Rejeté CP')}
-                        </div>
+                        </>
                     );
                 }
                 break;
             case 'SERVICE':
                  if (invoice.status === 'Validé CP' || invoice.status === 'Rejeté Service' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) {
                     return (
-                        <div className="flex items-center gap-2">
+                        <>
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
                                 <Check className="h-4 w-4" />
                             </Button>
                             {renderRejectDialog('Rejeté Service')}
-                        </div>
+                        </>
                     );
                 }
                 break;
             case 'FINANCES':
                 if (invoice.status === 'À mandater') {
                      return (
-                        <div className="flex items-center gap-2">
+                        <>
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Mandatée')}>
                                 <Check className="h-4 w-4" />
                             </Button>
                             {renderRejectDialog('Rejeté Finances')}
-                        </div>
+                        </>
                     );
                 }
                 break;
@@ -225,7 +225,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
              <Tooltip>
                 <TooltipTrigger asChild>
                     <Button size="icon" variant="ghost" className="h-9 w-9">
-                        <Eye className="h-4 w-4 text-primary" />
+                        <Eye className="h-4 w-4 text-accent" />
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Visualiser</p></TooltipContent>
@@ -264,7 +264,7 @@ const CpRefCell: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                         <TooltipTrigger asChild>
                             <PopoverTrigger asChild>
                                 <Button size="icon" variant="ghost" className="h-7 w-7">
-                                    <FilePen className="h-4 w-4 text-primary" />
+                                    <FilePen className="h-4 w-4 text-accent" />
                                 </Button>
                             </PopoverTrigger>
                         </TooltipTrigger>
