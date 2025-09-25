@@ -46,6 +46,11 @@ export default function HistoryPage() {
 
     const filteredInvoices = React.useMemo(() => {
         let invoicesToShow = invoices;
+        const specialServices = ['CCAS', 'SAAD', 'DRE'];
+
+        if (currentUser?.role === 'COMMANDE PUBLIQUE') {
+            invoicesToShow = invoices.filter(inv => !specialServices.includes(inv.service));
+        }
 
         return invoicesToShow.filter(invoice => {
             const fileNameMatch = fileNameFilter ? invoice.fileName.toLowerCase().includes(fileNameFilter.toLowerCase()) : true;
@@ -56,7 +61,7 @@ export default function HistoryPage() {
 
             return fileNameMatch && serviceMatch && expenseTypeMatch && amountMatch && statusMatch;
         });
-    }, [invoices, fileNameFilter, serviceFilter, expenseTypeFilter, amountFilter, statusFilter]);
+    }, [invoices, fileNameFilter, serviceFilter, expenseTypeFilter, amountFilter, statusFilter, currentUser]);
 
     if (!currentUser || !['FINANCES', 'COMMANDE PUBLIQUE'].includes(currentUser.role)) {
         return (
