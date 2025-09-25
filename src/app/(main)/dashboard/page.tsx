@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X, FilePen, Send, Hourglass, Banknote, Building, FileText } from "lucide-react";
+import { Check, X, FilePen, Send, Hourglass, Banknote, Building, FileText, Eye, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 
 const statusConfig: { [key in InvoiceStatus]: { icon: React.ElementType, color: string, label: string } } = {
@@ -67,28 +73,40 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 if (invoice.status === 'À traiter') {
                     return (
                         <>
-                            <Input
-                                placeholder="Réf. CP"
-                                value={cpRef}
-                                onChange={(e) => setCpRef(e.target.value)}
-                                className="w-32"
-                            />
-                            <Button size="sm" onClick={() => { handleCpRefUpdate(); updateInvoiceStatus(invoice.id, 'Validé CP'); }} disabled={!cpRef}>
-                                <Check className="mr-2 h-4 w-4" /> Valider
-                            </Button>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="destructive"><X className="mr-2 h-4 w-4" /> Rejeter</Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
-                                    <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => updateInvoiceStatus(invoice.id, 'Rejeté CP', comment)} disabled={!comment}>Confirmer le rejet</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                             <div className="flex items-center gap-2">
+                                <Input
+                                    placeholder="Réf. CP"
+                                    value={cpRef}
+                                    onChange={(e) => setCpRef(e.target.value)}
+                                    className="w-32 h-9"
+                                />
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button size="icon" className="h-9 w-9" onClick={() => { handleCpRefUpdate(); updateInvoiceStatus(invoice.id, 'Validé CP'); }} disabled={!cpRef}>
+                                            <Check className="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Approuver</p></TooltipContent>
+                                </Tooltip>
+                                <AlertDialog>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <AlertDialogTrigger asChild>
+                                                <Button size="icon" variant="destructive" className="h-9 w-9"><X className="h-4 w-4" /></Button>
+                                            </AlertDialogTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Rejeter</p></TooltipContent>
+                                    </Tooltip>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
+                                        <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => updateInvoiceStatus(invoice.id, 'Rejeté CP', comment)} disabled={!comment}>Confirmer le rejet</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
                         </>
                     );
                 }
@@ -97,13 +115,23 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                  if (invoice.status === 'Validé CP' || invoice.status === 'Rejeté Service') {
                     return (
                         <>
-                            <Button size="sm" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
-                                <Check className="mr-2 h-4 w-4" /> Valider
-                            </Button>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button size="icon" className="h-9 w-9" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
+                                        <Check className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>Approuver</p></TooltipContent>
+                            </Tooltip>
                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="destructive"><X className="mr-2 h-4 w-4" /> Rejeter</Button>
-                                </AlertDialogTrigger>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <AlertDialogTrigger asChild>
+                                            <Button size="icon" variant="destructive" className="h-9 w-9"><X className="h-4 w-4" /></Button>
+                                        </AlertDialogTrigger>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Rejeter</p></TooltipContent>
+                                </Tooltip>
                                 <AlertDialogContent>
                                     <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
                                     <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
@@ -121,13 +149,23 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 if (invoice.status === 'À mandater') {
                      return (
                         <>
-                            <Button size="sm" onClick={() => updateInvoiceStatus(invoice.id, 'Mandatée')}>
-                                <Check className="mr-2 h-4 w-4" /> Mandater
-                            </Button>
+                             <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button size="icon" className="h-9 w-9" onClick={() => updateInvoiceStatus(invoice.id, 'Mandatée')}>
+                                        <Check className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>Mandater</p></TooltipContent>
+                            </Tooltip>
                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="destructive"><X className="mr-2 h-4 w-4" /> Rejeter</Button>
-                                </AlertDialogTrigger>
+                                 <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <AlertDialogTrigger asChild>
+                                            <Button size="icon" variant="destructive" className="h-9 w-9"><X className="h-4 w-4" /></Button>
+                                        </AlertDialogTrigger>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Rejeter</p></TooltipContent>
+                                </Tooltip>
                                 <AlertDialogContent>
                                     <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
                                     <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
@@ -146,7 +184,27 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
         }
     };
 
-    return <div className="flex items-center gap-2">{renderActions()}</div>;
+    return (
+        <div className="flex items-center justify-center gap-1">
+             <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-9 w-9">
+                        <Eye className="h-4 w-4" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Visualiser</p></TooltipContent>
+            </Tooltip>
+             <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-9 w-9">
+                        <MessageSquare className="h-4 w-4" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Commentaires ({invoice.comments.length})</p></TooltipContent>
+            </Tooltip>
+            {renderActions()}
+        </div>
+    );
 };
 
 
@@ -196,99 +254,99 @@ export default function DashboardPage() {
     const RoleIcon = getRoleIcon();
 
     return (
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-4">
-                        <RoleIcon className="h-8 w-8 text-primary" />
-                        <div>
-                            <CardTitle className="text-2xl font-headline">Tableau de bord</CardTitle>
-                            <CardDescription>Factures nécessitant votre attention</CardDescription>
+        <TooltipProvider>
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-4">
+                            <RoleIcon className="h-8 w-8 text-primary" />
+                            <div>
+                                <CardTitle className="text-2xl font-headline">Tableau de bord</CardTitle>
+                                <CardDescription>Factures nécessitant votre attention</CardDescription>
+                            </div>
                         </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                     <div className="grid gap-4 md:grid-cols-3">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Factures</CardTitle>
-                                <FileText className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.total}</div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">À traiter</CardTitle>
-                                <Hourglass className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.toProcess}</div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Rejetées</CardTitle>
-                                <X className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.rejected}</div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardHeader>
+                    <CardContent>
+                         <div className="grid gap-4 md:grid-cols-3">
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">Total Factures</CardTitle>
+                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{stats.total}</div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">À traiter</CardTitle>
+                                    <Hourglass className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{stats.toProcess}</div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">Rejetées</CardTitle>
+                                    <X className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{stats.rejected}</div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </CardContent>
+                </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Liste des factures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="overflow-x-auto rounded-md border">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nom du fichier</TableHead>
-                                    <TableHead>Service</TableHead>
-                                    <TableHead>Date de dépôt</TableHead>
-                                    <TableHead className="text-right">Montant</TableHead>
-                                    <TableHead>Statut</TableHead>
-                                    <TableHead className="text-center">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {invoicesForUser.length > 0 ? (
-                                    invoicesForUser.map((invoice) => (
-                                        <TableRow key={invoice.id} className={invoice.isInvalid ? 'bg-red-900/20' : ''}>
-                                            <TableCell className="font-medium">{invoice.fileName}</TableCell>
-                                            <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
-                                            <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
-                                            <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
-                                            <TableCell>
-                                                <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                { invoice.isInvalid ? (
-                                                     <Badge variant="destructive">Nom de fichier invalide</Badge>
-                                                ) : <RoleSpecificActions invoice={invoice} /> }
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Liste des factures</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="overflow-x-auto rounded-md border">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Nom du fichier</TableHead>
+                                        <TableHead>Service</TableHead>
+                                        <TableHead>Date de dépôt</TableHead>
+                                        <TableHead className="text-right">Montant</TableHead>
+                                        <TableHead>Statut</TableHead>
+                                        <TableHead className="text-center">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {invoicesForUser.length > 0 ? (
+                                        invoicesForUser.map((invoice) => (
+                                            <TableRow key={invoice.id} className={invoice.isInvalid ? 'bg-red-900/20' : ''}>
+                                                <TableCell className="font-medium">{invoice.fileName}</TableCell>
+                                                <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
+                                                <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
+                                                <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
+                                                <TableCell>
+                                                    <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    { invoice.isInvalid ? (
+                                                         <Badge variant="destructive">Nom de fichier invalide</Badge>
+                                                    ) : <RoleSpecificActions invoice={invoice} /> }
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="h-24 text-center">
+                                                Aucune facture à traiter pour le moment.
                                             </TableCell>
                                         </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center">
-                                            Aucune facture à traiter pour le moment.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </TooltipProvider>
     );
 }
-
-    
