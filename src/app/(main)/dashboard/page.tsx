@@ -225,7 +225,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
              <Tooltip>
                 <TooltipTrigger asChild>
                     <Button size="icon" variant="ghost" className="h-9 w-9">
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-4 w-4 text-primary" />
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Visualiser</p></TooltipContent>
@@ -264,7 +264,7 @@ const CpRefCell: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                         <TooltipTrigger asChild>
                             <PopoverTrigger asChild>
                                 <Button size="icon" variant="ghost" className="h-7 w-7">
-                                    <FilePen className="h-4 w-4" />
+                                    <FilePen className="h-4 w-4 text-primary" />
                                 </Button>
                             </PopoverTrigger>
                         </TooltipTrigger>
@@ -341,11 +341,13 @@ export default function DashboardPage() {
                     'Rejet CP': invoices.filter(i => i.status === 'Rejeté CP').length,
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
-            default: // SERVICE role
+            case 'SERVICE':
                  const serviceInvoices = invoices.filter(inv => inv.service === currentUser.id);
                 return {
                     'Total Factures': serviceInvoices.length,
                 };
+            default: 
+                return {};
         }
     }, [currentUser, invoices]);
     
