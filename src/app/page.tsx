@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -91,7 +92,7 @@ export default function LoginPage() {
                         <SelectContent>
                           {orderedServices.map((service) => (
                             <SelectItem key={service.id} value={service.id}>
-                              {service.name}
+                              {service.name.replace('SG - ', '')}
                             </SelectItem>
                           ))}
                         </SelectContent>
