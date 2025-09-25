@@ -48,7 +48,7 @@ export default function LoginPage() {
 
   const orderedServices = React.useMemo(() => {
     const specialServices = ['FINANCES', 'COMMANDE PUBLIQUE'];
-    const excludedServices = ['SAAD', 'SGGDSTRAV', 'SGRAM', 'SGFETES', 'SGDCVTP', 'SGCOMPUB', 'SGFINANCES'];
+    const excludedServices = ['SAAD', 'SGGDSTRAV', 'SGRAM', 'SGFETES', 'SGDCVTP', 'SGCOMPUB', 'SGFINANCES', 'SGAFP', 'SGELUS', 'SGENTRET', 'SGRECPT', 'SGREPDOM'];
     const special = services.filter(s => specialServices.includes(s.id));
     const others = services
       .filter(s => !specialServices.includes(s.id) && !excludedServices.includes(s.id))
