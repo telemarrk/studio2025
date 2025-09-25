@@ -214,7 +214,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 }
                 break;
             case 'SERVICE':
-                 if (invoice.status === 'Validé CP' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) {
+                 if ((invoice.status === 'Validé CP' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) && invoice.status !== 'Rejeté Service') {
                     return (
                         <>
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
@@ -368,7 +368,7 @@ export default function DashboardPage() {
                 if (specialServices.includes(currentUser.id)) {
                     return invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'À traiter');
                 }
-                return invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'Validé CP');
+                return invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'Validé CP' && inv.status !== 'Rejeté Service');
             default:
                 return [];
         }
@@ -398,7 +398,7 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'SERVICE':
-                 const serviceInvoices = invoices.filter(inv => inv.service === currentUser.id);
+                 const serviceInvoices = invoices.filter(inv => inv.service === currentUser.id && inv.status !== 'Rejeté Service');
                 return {
                     'Total Factures': serviceInvoices.length,
                 };
@@ -547,5 +547,4 @@ export default function DashboardPage() {
     
 
     
-
 
