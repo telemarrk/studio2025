@@ -1,8 +1,9 @@
+
 "use client";
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { HardHat, History, Home, Briefcase, FileText } from "lucide-react";
+import { HardHat, History, Home, Briefcase, FileText, PieChart } from "lucide-react";
 import {
   SidebarHeader,
   SidebarContent,
@@ -19,6 +20,7 @@ export default function AppSidebar() {
   const menuItems = [
     { href: "/dashboard", label: "Tableau de bord", icon: Home, roles: ["FINANCES", "COMMANDE PUBLIQUE", "SERVICE"] },
     { href: "/history", label: "Historique", icon: History, roles: ["FINANCES", "COMMANDE PUBLIQUE"] },
+    { href: "/stats", label: "Statistiques", icon: PieChart, roles: ["FINANCES"] },
     { href: "/services", label: "Gérer les services", icon: Briefcase, roles: ["FINANCES"] },
   ];
   
