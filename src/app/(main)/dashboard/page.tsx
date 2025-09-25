@@ -302,17 +302,30 @@ export default function DashboardPage() {
         if (!currentUser) return [];
 
         const specialServices = ['CCAS', 'SAAD', 'DRE'];
+        const excludedForCP = ['CCAS', 'SAAD', 'DRE'];
+
+        const serviceManagementMap: { [key: string]: string[] } = {
+            'SGMULTIACC': ['SGRAM'],
+            'SGDG': ['SGELUS'],
+            'SGJURID': ['SGAFP'],
+            'SGST': ['SGGDSTRAV', 'SGENTRET'],
+            'SGCOMMUNIC': ['SGRECPT'],
+            'CCAS': ['SAAD'],
+            'SGRESTO': ['SGREPDOM'],
+        };
 
         switch (currentUser.role) {
             case 'FINANCES':
                 return invoices.filter(inv => inv.status === 'À mandater');
             case 'COMMANDE PUBLIQUE':
-                return invoices.filter(inv => inv.status === 'À traiter' && !specialServices.includes(inv.service));
+                return invoices.filter(inv => inv.status === 'À traiter' && !excludedForCP.includes(inv.service));
             case 'SERVICE':
-                 if (specialServices.includes(currentUser.id)) {
-                    return invoices.filter(inv => inv.service === currentUser.id && (inv.status === 'À traiter' || inv.status === 'Rejeté Service'));
-                 }
-                return invoices.filter(inv => inv.service === currentUser.id && (inv.status === 'Validé CP' || inv.status === 'Rejeté Service'));
+                const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
+                
+                if (specialServices.includes(currentUser.id)) {
+                    return invoices.filter(inv => managedServices.includes(inv.service) && (inv.status === 'À traiter' || inv.status === 'Rejeté Service'));
+                }
+                return invoices.filter(inv => managedServices.includes(inv.service) && (inv.status === 'Validé CP' || inv.status === 'Rejeté Service'));
             default:
                 return [];
         }
@@ -485,5 +498,7 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
+
+    
 
     
