@@ -138,7 +138,7 @@ export default function HistoryPage() {
                                         <TableHead>Nom du fichier</TableHead>
                                         <TableHead>Service</TableHead>
                                         <TableHead>Type</TableHead>
-                                        <TableHead className="text-right">Montant</TableHead>
+                                        <TableHead className="text-right">Montant TTC</TableHead>
                                         <TableHead>Statut</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
                                         {currentUser.role === 'FINANCES' && <TableHead className="text-center">Actions</TableHead>}

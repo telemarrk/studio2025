@@ -21,7 +21,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -165,9 +164,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
         <AlertDialog>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <AlertDialogTrigger asChild>
-                        <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
-                    </AlertDialogTrigger>
+                    <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Rejeter</p></TooltipContent>
             </Tooltip>
@@ -436,10 +433,10 @@ export default function DashboardPage() {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
-                                        <TableHead>Type</TableHead>
                                         <TableHead>Service</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
-                                        <TableHead className="text-right">Montant</TableHead>
+                                        <TableHead>Type</TableHead>
+                                        <TableHead className="text-right">Montant TTC</TableHead>
                                         <TableHead>Réf. CP</TableHead>
                                         <TableHead>Statut</TableHead>
                                         <TableHead className="text-center">Actions</TableHead>
@@ -450,9 +447,9 @@ export default function DashboardPage() {
                                         invoicesForUser.map((invoice) => (
                                             <TableRow key={invoice.id} className={invoice.isInvalid ? 'bg-red-900/20' : ''}>
                                                 <TableCell className="font-medium">{invoice.fileName}</TableCell>
-                                                <TableCell>{invoice.expenseType}</TableCell>
                                                 <TableCell>{invoice.service}</TableCell>
                                                 <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
+                                                <TableCell>{invoice.expenseType}</TableCell>
                                                 <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
                                                 <TableCell>
                                                     <CpRefCell invoice={invoice} />
