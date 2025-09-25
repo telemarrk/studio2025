@@ -241,7 +241,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
     };
 
     return (
-        <div className="flex items-center justify-center gap-1">
+        <div className="flex items-center justify-center gap-2">
              <Tooltip>
                 <TooltipTrigger asChild>
                     <Button size="icon" variant="ghost" className="h-9 w-9">
