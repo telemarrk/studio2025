@@ -163,14 +163,9 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
 
     const renderRejectDialog = (status: 'Rejeté CP' | 'Rejeté Service' | 'Rejeté Finances') => (
         <AlertDialog>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                     <AlertDialogTrigger asChild>
-                        <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
-                    </AlertDialogTrigger>
-                </TooltipTrigger>
-                <TooltipContent><p>Rejeter</p></TooltipContent>
-            </Tooltip>
+            <AlertDialogTrigger asChild>
+                <Button size="icon" variant="destructive" className="h-8 w-8"><X className="h-4 w-4" /></Button>
+            </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader><AlertDialogTitle>Motif du rejet</AlertDialogTitle></AlertDialogHeader>
                 <Textarea placeholder="Expliquez pourquoi la facture est rejetée..." value={comment} onChange={e => setComment(e.target.value)} />
@@ -188,14 +183,9 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 if (invoice.status === 'À traiter') {
                     return (
                         <>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')} disabled={!invoice.cpRef}>
-                                        <Check className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>Approuver</p></TooltipContent>
-                            </Tooltip>
+                            <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Validé CP')} disabled={!invoice.cpRef}>
+                                <Check className="h-4 w-4" />
+                            </Button>
                             {renderRejectDialog('Rejeté CP')}
                         </>
                     );
@@ -205,14 +195,9 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                  if (invoice.status === 'Validé CP' || invoice.status === 'Rejeté Service' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) {
                     return (
                         <>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
-                                        <Check className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>Approuver</p></TooltipContent>
-                            </Tooltip>
+                            <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
+                                <Check className="h-4 w-4" />
+                            </Button>
                             {renderRejectDialog('Rejeté Service')}
                         </>
                     );
@@ -222,14 +207,9 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 if (invoice.status === 'À mandater') {
                      return (
                         <>
-                             <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Mandatée')}>
-                                        <Check className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>Mandater</p></TooltipContent>
-                            </Tooltip>
+                            <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'Mandatée')}>
+                                <Check className="h-4 w-4" />
+                            </Button>
                             {renderRejectDialog('Rejeté Finances')}
                         </>
                     );
@@ -347,18 +327,19 @@ export default function DashboardPage() {
                     'Factures Rejetées par les services': cpInvoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'FINANCES':
+                 const financeInvoices = invoices.filter(inv => inv.status === 'À mandater');
                 return {
-                    'Factures à Mandater': allInvoicesForRole.filter(i => i.status === 'À mandater').length,
-                    'Fonctionnement': allInvoicesForRole.filter(i => i.expenseType === 'Fonctionnement').length,
-                    'Fluide': allInvoicesForRole.filter(i => i.expenseType === 'Fluide').length,
-                    'Investissement': allInvoicesForRole.filter(i => i.expenseType === 'Investissement').length,
-                    'Rejet CP': allInvoicesForRole.filter(i => i.status === 'Rejeté CP').length,
-                    'Rejet Services': allInvoicesForRole.filter(i => i.status === 'Rejeté Service').length,
+                    'Factures à Mandater': financeInvoices.length,
+                    'Fonctionnement': financeInvoices.filter(i => i.expenseType === 'Fonctionnement').length,
+                    'Fluide': financeInvoices.filter(i => i.expenseType === 'Fluide').length,
+                    'Investissement': financeInvoices.filter(i => i.expenseType === 'Investissement').length,
+                    'Rejet CP': invoices.filter(i => i.status === 'Rejeté CP').length,
+                    'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             default: // SERVICE role
                 return {
                     'Total Factures': invoicesForUser.length,
-                    'À traiter': invoicesForUser.filter(inv => ['À traiter', 'Validé CP', 'À mandater'].includes(inv.status)).length,
+                    'À traiter': invoicesForUser.filter(inv => ['À traiter', 'Validé CP'].includes(inv.status)).length,
                     'Rejetées': invoicesForUser.filter(inv => inv.status.startsWith('Rejeté')).length,
                 };
         }
