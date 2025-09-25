@@ -436,6 +436,7 @@ export default function DashboardPage() {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
+                                        <TableHead>Type</TableHead>
                                         <TableHead>Service</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
                                         <TableHead className="text-right">Montant</TableHead>
@@ -449,6 +450,7 @@ export default function DashboardPage() {
                                         invoicesForUser.map((invoice) => (
                                             <TableRow key={invoice.id} className={invoice.isInvalid ? 'bg-red-900/20' : ''}>
                                                 <TableCell className="font-medium">{invoice.fileName}</TableCell>
+                                                <TableCell>{invoice.expenseType}</TableCell>
                                                 <TableCell>{invoice.service}</TableCell>
                                                 <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
                                                 <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
@@ -467,7 +469,7 @@ export default function DashboardPage() {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={7} className="h-24 text-center">
+                                            <TableCell colSpan={8} className="h-24 text-center">
                                                 Aucune facture à traiter pour le moment.
                                             </TableCell>
                                         </TableRow>
@@ -481,5 +483,3 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
-
-    
