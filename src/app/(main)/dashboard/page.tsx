@@ -334,7 +334,7 @@ export default function DashboardPage() {
         if (!currentUser) return [];
 
         const specialServices = ['CCAS', 'SAAD', 'DRE'];
-        const excludedForCP = ['CCAS', 'SAAD', 'DRE'];
+        const excludedForCP = ['CCAS', 'SAAD', 'DRE', 'SGFINANCES'];
 
         const serviceManagementMap: { [key: string]: string[] } = {
             'SGMULTIACC': ['SGRAM'],
@@ -547,3 +547,4 @@ export default function DashboardPage() {
     
 
     
+
