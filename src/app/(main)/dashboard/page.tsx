@@ -434,11 +434,11 @@ export default function DashboardPage() {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
-                                        <TableHead>Service</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
-                                        <TableHead>Type</TableHead>
+                                        <TableHead>Type de dépenses</TableHead>
                                         <TableHead className="text-right">Montant TTC</TableHead>
                                         <TableHead>Réf. CP</TableHead>
+                                        <TableHead>Service</TableHead>
                                         <TableHead>Statut</TableHead>
                                         <TableHead className="text-center">Actions</TableHead>
                                     </TableRow>
@@ -448,13 +448,13 @@ export default function DashboardPage() {
                                         invoicesForUser.map((invoice) => (
                                             <TableRow key={invoice.id} className={invoice.isInvalid ? 'bg-red-900/20' : ''}>
                                                 <TableCell className="font-medium">{invoice.fileName}</TableCell>
-                                                <TableCell>{invoice.service}</TableCell>
                                                 <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
                                                 <TableCell>{invoice.expenseType}</TableCell>
                                                 <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
                                                 <TableCell>
                                                     <CpRefCell invoice={invoice} />
                                                 </TableCell>
+                                                <TableCell>{invoice.service}</TableCell>
                                                 <TableCell>
                                                     <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
                                                 </TableCell>
