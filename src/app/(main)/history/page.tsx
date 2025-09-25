@@ -22,7 +22,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -196,52 +195,72 @@ export default function HistoryPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {filteredInvoices.length > 0 ? (
-                                        filteredInvoices.map((invoice) => (
-                                            <TableRow key={invoice.id}>
-                                                <TableCell className="font-medium">{invoice.fileName}</TableCell>
-                                                <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
-                                                <TableCell>{invoice.expenseType}</TableCell>
-                                                <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
-                                                <TableCell>{invoice.cpRef}</TableCell>
-                                                <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
-                                                <TableCell>
-                                                    <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {invoice.status === 'Mandatée' ? 0 : differenceInDays(today, invoice.depositDate)} jours
-                                                </TableCell>
-                                                {currentUser.role === 'FINANCES' && (
-                                                    <TableCell className="text-center">
-                                                        <div className="flex justify-center items-center gap-2">
-                                                            { (invoice.status === 'Mandatée' || invoice.status === 'Traité') && (
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button variant="ghost" size="icon" onClick={() => handleRevertClick(invoice)}>
-                                                                            <Undo2 className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>Remettre "À mandater"</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            )}
-                                                            { (invoice.status === 'Rejeté CP' || invoice.status === 'Rejeté Service') && (
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button variant="ghost" size="icon" onClick={() => markInvoiceAsTraite(invoice.id)}>
-                                                                            <CheckCheck className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>Marquer comme "Traité"</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            )}
-                                                        </div>
+                                        filteredInvoices.map((invoice) => {
+                                            const rejectionStatuses: InvoiceStatus[] = ['Rejeté CP', 'Rejeté Service', 'Rejeté Finances'];
+                                            const isRejected = rejectionStatuses.includes(invoice.status);
+                                            const rejectionComment = isRejected && invoice.comments.length > 0
+                                                ? invoice.comments[invoice.comments.length - 1]
+                                                : null;
+
+                                            return (
+                                                <TableRow key={invoice.id}>
+                                                    <TableCell className="font-medium">{invoice.fileName}</TableCell>
+                                                    <TableCell>{format(invoice.depositDate, 'dd/MM/yyyy', { locale: fr })}</TableCell>
+                                                    <TableCell>{invoice.expenseType}</TableCell>
+                                                    <TableCell className="text-right">{invoice.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</TableCell>
+                                                    <TableCell>{invoice.cpRef}</TableCell>
+                                                    <TableCell>{services.find(s => s.id === invoice.service)?.name || invoice.service}</TableCell>
+                                                    <TableCell>
+                                                        {isRejected && rejectionComment ? (
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Badge className={cn("text-white cursor-help", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p className="font-semibold">{rejectionComment.user} a écrit :</p>
+                                                                    <p>{rejectionComment.text}</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        ) : (
+                                                            <Badge className={cn("text-white", statusColors[invoice.status])} variant="default">{invoice.status}</Badge>
+                                                        )}
                                                     </TableCell>
-                                                )}
-                                            </TableRow>
-                                        ))
+                                                    <TableCell>
+                                                        {invoice.status === 'Mandatée' ? 0 : differenceInDays(today, invoice.depositDate)} jours
+                                                    </TableCell>
+                                                    {currentUser.role === 'FINANCES' && (
+                                                        <TableCell className="text-center">
+                                                            <div className="flex justify-center items-center gap-2">
+                                                                { (invoice.status === 'Mandatée' || invoice.status === 'Traité') && (
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button variant="ghost" size="icon" onClick={() => handleRevertClick(invoice)}>
+                                                                                <Undo2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p>Remettre "À mandater"</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                )}
+                                                                { (invoice.status === 'Rejeté CP' || invoice.status === 'Rejeté Service') && (
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button variant="ghost" size="icon" onClick={() => markInvoiceAsTraite(invoice.id)}>
+                                                                                <CheckCheck className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p>Marquer comme "Traité"</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                )}
+                                                            </div>
+                                                        </TableCell>
+                                                    )}
+                                                </TableRow>
+                                            )
+                                        })
                                     ) : (
                                         <TableRow>
                                             <TableCell colSpan={currentUser.role === 'FINANCES' ? 9 : 8} className="h-24 text-center">
