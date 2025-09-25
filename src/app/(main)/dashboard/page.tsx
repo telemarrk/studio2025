@@ -251,7 +251,9 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 <TooltipContent><p>Visualiser</p></TooltipContent>
             </Tooltip>
             <CommentsSheet invoice={invoice} />
-            {renderActions()}
+            <div className="flex items-center gap-2">
+                {renderActions()}
+            </div>
         </div>
     );
 };
