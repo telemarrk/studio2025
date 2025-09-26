@@ -214,7 +214,7 @@ const RoleSpecificActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
                 }
                 break;
             case 'SERVICE':
-                 if ((invoice.status === 'Validé CP' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter')) && invoice.status !== 'Rejeté Service') {
+                 if ((invoice.status === 'Validé CP' || (['CCAS', 'SAAD', 'DRE'].includes(currentUser.id) && invoice.status === 'À traiter'))) {
                     return (
                         <>
                             <Button size="icon" className="h-8 w-8" onClick={() => updateInvoiceStatus(invoice.id, 'À mandater')}>
@@ -370,7 +370,7 @@ export default function DashboardPage() {
                 if (specialServices.includes(currentUser.id)) {
                     return invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'À traiter');
                 }
-                return invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'Validé CP' && inv.status !== 'Rejeté Service');
+                return invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'Validé CP');
             default:
                 return [];
         }
@@ -400,8 +400,10 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'SERVICE':
+                 const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
+                 const serviceInvoices = invoicesForUser.filter(inv => managedServices.includes(inv.service));
                 return {
-                    'Total Factures': invoicesForUser.length,
+                    'Total Factures': serviceInvoices.length,
                 };
             default: 
                 return {};
@@ -494,9 +496,9 @@ export default function DashboardPage() {
                         <CardTitle>Liste des factures</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="overflow-auto rounded-md border" style={{ maxHeight: '60vh' }}>
+                        <div className="overflow-y-auto rounded-md border" style={{ maxHeight: '60vh' }}>
                             <Table>
-                                <TableHeader className="sticky top-0 bg-card z-10">
+                                <TableHeader className="sticky top-0 z-10 bg-card">
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
                                         <TableHead>Date de dépôt</TableHead>

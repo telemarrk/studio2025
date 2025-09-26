@@ -194,7 +194,7 @@ export default function HistoryPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="overflow-auto rounded-md border" style={{ maxHeight: '60vh' }}>
+                        <div className="overflow-y-auto rounded-md border" style={{ maxHeight: '60vh' }}>
                             <Table>
                                 <TableHeader className="sticky top-0 z-10 bg-card">
                                     <TableRow>
