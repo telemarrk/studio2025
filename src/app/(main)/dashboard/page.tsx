@@ -400,9 +400,8 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'SERVICE':
-                 const serviceInvoices = invoicesForUser;
                 return {
-                    'Total Factures': serviceInvoices.length,
+                    'Total Factures': invoicesForUser.length,
                 };
             default: 
                 return {};
@@ -495,9 +494,9 @@ export default function DashboardPage() {
                         <CardTitle>Liste des factures</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="overflow-y-auto rounded-md border" style={{ maxHeight: '60vh' }}>
+                        <div className="relative h-[60vh] overflow-auto rounded-md border">
                             <Table>
-                                <TableHeader style={{ position: 'sticky', top: 0, zIndex: 10 }} className="bg-card">
+                                <TableHeader className="sticky top-0 z-10 bg-card">
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
@@ -551,3 +550,5 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
+
+    
