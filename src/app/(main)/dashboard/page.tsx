@@ -398,12 +398,8 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'SERVICE':
-                const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
-                 const serviceInvoices = specialServices.includes(currentUser.id)
-                    ? invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'À traiter')
-                    : invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'Validé CP' && inv.status !== 'Rejeté Service');
                 return {
-                    'Total Factures': serviceInvoices.length,
+                    'Total Factures': invoicesForUser.length,
                 };
             default: 
                 return {};
@@ -426,7 +422,6 @@ export default function DashboardPage() {
     }
 
     const statCardColors: {[key: string]: string} = {
-        'Factures à Mandater': 'bg-orange-900/20 border-orange-500/50',
         'Fonctionnement': 'bg-blue-900/20 border-blue-500/50',
         'Fluide': 'bg-cyan-900/20 border-cyan-500/50',
         'Investissement': 'bg-green-900/20 border-green-500/50',
@@ -553,6 +548,8 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
+
+    
 
     
 
