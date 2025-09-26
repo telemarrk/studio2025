@@ -344,8 +344,7 @@ export default function DashboardPage() {
         if (!currentUser) return [];
 
         const specialServices = ['CCAS', 'SAAD', 'DRE'];
-        const excludedForCP = ['CCAS', 'SAAD', 'DRE', 'SGFINANCES'];
-
+        
         switch (currentUser.role) {
             case 'FINANCES':
                 return invoices.filter(inv => 
@@ -354,7 +353,10 @@ export default function DashboardPage() {
                 );
             case 'COMMANDE PUBLIQUE':
                 return invoices.filter(inv => {
-                    if (excludedForCP.includes(inv.service)) {
+                    if (inv.service === 'SGFINANCES') {
+                        return false;
+                    }
+                    if (specialServices.includes(inv.service)) {
                         return false;
                     }
                     if (inv.service === 'SGCOMPUB') {
@@ -468,7 +470,7 @@ export default function DashboardPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                             {Object.entries(stats).map(([title, value]) => {
                                 const Icon = statIcons[title] || FileText;
                                 return (
@@ -548,6 +550,8 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
+
+    
 
     
 
