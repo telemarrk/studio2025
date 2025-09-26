@@ -195,9 +195,9 @@ export default function HistoryPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="overflow-x-auto rounded-md border">
+                        <div className="overflow-x-auto rounded-md border max-h-[60vh]">
                             <Table>
-                                <TableHeader>
+                                <TableHeader className="sticky top-0 bg-card z-10">
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
