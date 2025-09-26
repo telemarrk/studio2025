@@ -494,7 +494,7 @@ export default function DashboardPage() {
                         <CardTitle>Liste des factures</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="overflow-x-auto rounded-md border max-h-[60vh]">
+                        <div className="overflow-auto rounded-md border" style={{ maxHeight: '60vh' }}>
                             <Table>
                                 <TableHeader className="sticky top-0 bg-card z-10">
                                     <TableRow>
@@ -550,15 +550,3 @@ export default function DashboardPage() {
         </TooltipProvider>
     );
 }
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    

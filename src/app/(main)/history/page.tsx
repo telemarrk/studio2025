@@ -29,7 +29,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -195,7 +194,7 @@ export default function HistoryPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="overflow-x-auto rounded-md border max-h-[60vh]">
+                        <div className="overflow-auto rounded-md border" style={{ maxHeight: '60vh' }}>
                             <Table>
                                 <TableHeader className="sticky top-0 bg-card z-10">
                                     <TableRow>
