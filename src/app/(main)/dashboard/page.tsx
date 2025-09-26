@@ -400,8 +400,7 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'SERVICE':
-                 const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
-                 const serviceInvoices = invoicesForUser.filter(inv => managedServices.includes(inv.service));
+                 const serviceInvoices = invoicesForUser;
                 return {
                     'Total Factures': serviceInvoices.length,
                 };
@@ -498,7 +497,7 @@ export default function DashboardPage() {
                     <CardContent>
                         <div className="overflow-y-auto rounded-md border" style={{ maxHeight: '60vh' }}>
                             <Table>
-                                <TableHeader className="sticky top-0 z-10 bg-card">
+                                <TableHeader style={{ position: 'sticky', top: 0, zIndex: 10 }} className="bg-card">
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
