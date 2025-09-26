@@ -398,13 +398,17 @@ export default function DashboardPage() {
                     'Rejet Services': invoices.filter(i => i.status === 'Rejeté Service').length,
                 };
             case 'SERVICE':
+                const managedServices = [currentUser.id, ...(serviceManagementMap[currentUser.id] || [])];
+                 const serviceInvoices = specialServices.includes(currentUser.id)
+                    ? invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'À traiter')
+                    : invoices.filter(inv => managedServices.includes(inv.service) && inv.status === 'Validé CP' && inv.status !== 'Rejeté Service');
                 return {
-                    'Total Factures': invoicesForUser.length,
+                    'Total Factures': serviceInvoices.length,
                 };
             default: 
                 return {};
         }
-    }, [currentUser, invoices, invoicesForUser]);
+    }, [currentUser, invoices, invoicesForUser, serviceManagementMap]);
     
     const statIcons: {[key: string]: React.ElementType} = {
         'À Traiter': Hourglass,
@@ -419,6 +423,15 @@ export default function DashboardPage() {
         'Total Factures': FileText,
         'À traiter': Hourglass,
         'Rejetées': X,
+    }
+
+    const statCardColors: {[key: string]: string} = {
+        'Factures à Mandater': 'bg-orange-900/20 border-orange-500/50',
+        'Fonctionnement': 'bg-blue-900/20 border-blue-500/50',
+        'Fluide': 'bg-cyan-900/20 border-cyan-500/50',
+        'Investissement': 'bg-green-900/20 border-green-500/50',
+        'Rejet CP': 'bg-red-900/20 border-red-500/50',
+        'Rejet Services': 'bg-red-900/20 border-red-500/50',
     }
 
 
@@ -464,7 +477,7 @@ export default function DashboardPage() {
                             {Object.entries(stats).map(([title, value]) => {
                                 const Icon = statIcons[title] || FileText;
                                 return (
-                                    <Card key={title}>
+                                    <Card key={title} className={cn(currentUser.role === 'FINANCES' && statCardColors[title])}>
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                             <CardTitle className="text-sm font-medium">{title}</CardTitle>
                                             <Icon className="h-4 w-4 text-muted-foreground" />
@@ -546,4 +559,3 @@ export default function DashboardPage() {
     
 
     
-
