@@ -196,7 +196,7 @@ export default function HistoryPage() {
                         </div>
                         <div className="overflow-auto rounded-md border" style={{ maxHeight: '60vh' }}>
                             <Table>
-                                <TableHeader className="sticky top-0 bg-card z-10">
+                                <TableHeader className="sticky top-0 z-10 bg-card">
                                     <TableRow>
                                         <TableHead>Nom du fichier</TableHead>
                                         <TableHead>Date de dépôt</TableHead>
